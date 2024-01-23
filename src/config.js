@@ -20,5 +20,6 @@ if (process.env.NODE_ENV !== 'production') {
 export default {
   port: process.env.PORT || 8000,
   cors: process.env.CORS || '',
-  mongoose: { uri: process.env.MONGODB_URI || '' }
+  mongoose: { uri: process.env.MONGODB_URI || '' },
+  saltFactor: Number(process.env.SALT_WORK_FACTOR) || 10
 };

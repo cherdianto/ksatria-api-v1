@@ -1,5 +1,6 @@
 import express from 'express';
 
+// import { AuthRouter } from './auth';
 import { UserRouter } from './user';
 
 /**
@@ -9,6 +10,10 @@ import { UserRouter } from './user';
 const router = express.Router();
 
 const defaultRoutes = [
+  // {
+  //   path: '/',
+  //   route: AuthRouter
+  // },
   {
     path: '/user',
     route: UserRouter

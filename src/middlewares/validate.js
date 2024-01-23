@@ -25,7 +25,7 @@ const validate = (schema) => (req, res, next) => {
   if (error) {
     const errorMessage = error.details.map((details) => details.message).join(', ');
 
-    return res.status(BAD_REQUEST).json(formatResponse(errorMessage, false, BAD_REQUEST)).end();
+    return res.status(BAD_REQUEST).json(formatResponse(errorMessage, false, BAD_REQUEST));
   }
 
   Object.assign(req, value);
