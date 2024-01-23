@@ -10,7 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
   try {
     dotenv.config({
       path: path.resolve(path.dirname(''), '.env'),
-      silent: true,
+      silent: true
     });
   } catch (e) {
     logger.error(e.message);
@@ -20,5 +20,5 @@ if (process.env.NODE_ENV !== 'production') {
 export default {
   port: process.env.PORT || 8000,
   cors: process.env.CORS || '',
-  mongoose: { uri: process.env.MONGODB_URI || '' },
+  mongoose: { uri: process.env.MONGODB_URI || '' }
 };

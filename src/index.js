@@ -1,26 +1,8 @@
-import cors from 'cors';
-import express from 'express';
 import mongoose from 'mongoose';
-import morganBody from 'morgan-body';
-import { StatusCodes } from 'http-status-codes';
 
-import router from './user/router';
+import app from './app';
 import config from './config';
-import { formatResponse, logger } from './util';
-
-const app = express();
-
-/**
- * logging all server activity
- * @function
-*/
-morganBody(app, {
-  stream: {
-    write: (message) => {
-      logger.info(message);
-    },
-  },
-});
+import { logger } from './util';
 
 /**
  * check if envy exist first
@@ -35,26 +17,6 @@ mongoose.connect(config.mongoose.uri)
   .then(logger.info(`Connected to: ${config.mongoose.uri}`))
   .catch((err) => logger.error(err));
 mongoose.Promise = global.Promise;
-
-/**
- * setup express app
- */
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-/**
- * setup express route
- */
-app.get('/ping', (req, res) => res.send('pong'));
-app.use('/user', router);
-
-/**
- * setup express middleware
- */
-app.use((req, res) => {
-  res.status(404).json(formatResponse('Not found', false, StatusCodes.NOT_FOUND));
-});
 
 /**
  * setup express server

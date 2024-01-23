@@ -4,6 +4,10 @@ import { StatusCodes } from 'http-status-codes';
 import UserModel from './model';
 import { formatResponse } from '../util';
 
+const {
+  OK, NOT_FOUND, CREATED, INTERNAL_SERVER_ERROR
+} = StatusCodes;
+
 // Getting all user
 const get = (req, res) => {
   UserModel.find()
@@ -11,17 +15,17 @@ const get = (req, res) => {
       // case db = empty
       if (users.length === 0) {
         return res
-          .status(200)
+          .status(OK)
           .json(
-            formatResponse('Database is empty', true),
+            formatResponse('Database is empty', true)
           );
       }
-      return res.status(200).json(
-        formatResponse('Successfully retrieve all user data', true, undefined, { users }),
+      return res.status(OK).json(
+        formatResponse('Successfully retrieve all user data', true, undefined, { users })
       );
     })
     .catch((err) => {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
     });
 };
 
@@ -29,17 +33,19 @@ const get = (req, res) => {
 const create = (req, res) => {
   const newUser = new UserModel({
     name: req.body.name,
-    fingerprint: nanoid(),
+    fingerprint: nanoid()
   });
 
   newUser.save()
     .then(() => {
-      res.status(201).send(
-        formatResponse('Successfully register user', true, undefined, { user: newUser }),
+      res.status(CREATED).send(
+        formatResponse('Successfully register user', true, undefined, { user: newUser })
       );
     })
     .catch((err) => {
-      res.status(500).send(formatResponse(err.message, false, 500, undefined));
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
     });
 };
 
@@ -53,28 +59,27 @@ const remove = (req, res) => {
       // case user not found
       if (!data) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send(
             formatResponse(
               `Cannot delete user with id= ${id}. Failed to find user with that id`,
               false,
-              404,
-              undefined,
-            ),
+              NOT_FOUND
+            )
           );
       } else {
         res.send(
-          formatResponse('Successfully delete user', true, undefined, undefined),
+          formatResponse('Successfully delete user', true)
         );
       }
     })
     .catch((err) => {
-      res.status(500).send(formatResponse(err.message, false, 500, undefined));
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
     });
 };
 
 export default {
   get,
   create,
-  remove,
+  remove
 };

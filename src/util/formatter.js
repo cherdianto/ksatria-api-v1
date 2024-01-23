@@ -14,12 +14,12 @@ const formatResponse = (
   message,
   success = true,
   errorCode = StatusCodes.INTERNAL_SERVER_ERROR,
-  data = {},
+  data = {}
 ) => ({
   success,
   message,
   ...(!success && { errorCode }),
-  data,
+  data
 });
 
 export default formatResponse;

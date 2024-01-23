@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 
-// Define the model
+/**
+ * user model definition
+ */
 const Schema = new mongoose.Schema({
   name: String,
-  fingerprint: String,
+  fingerprint: String
 }, { timestamps: true });
 
 export default mongoose.model('User', Schema);
