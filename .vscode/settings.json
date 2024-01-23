@@ -1,0 +1,11 @@
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.fixAll.sort-json": "never"
+    },
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": true,
+    "files.eol": "\n"
+}
