@@ -1,7 +1,6 @@
 import express from 'express';
 
-// import { AuthRouter } from './auth';
-import { UserRouter } from './user';
+import { AuthRouter, UserRouter } from './services';
 
 /**
  * express router
@@ -9,11 +8,15 @@ import { UserRouter } from './user';
  */
 const router = express.Router();
 
+/**
+ * all routes lists
+ * @constant
+ */
 const defaultRoutes = [
-  // {
-  //   path: '/',
-  //   route: AuthRouter
-  // },
+  {
+    path: '/auth',
+    route: AuthRouter
+  },
   {
     path: '/user',
     route: UserRouter

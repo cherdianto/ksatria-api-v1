@@ -1,6 +1,10 @@
 import Joi from 'joi';
 
-const register = {
+/**
+ * validator for login api
+ * @constant
+ */
+const login = {
   body: Joi.object().keys({
     username:
     Joi.string()
@@ -13,5 +17,5 @@ const register = {
 };
 
 export default {
-  register
+  login
 };

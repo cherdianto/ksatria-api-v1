@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 
-import UserModel from './model';
-import { formatResponse } from '../util';
+import UserModel from './user.model';
+import { formatResponse } from '../../util';
 
 const {
   CREATED, INTERNAL_SERVER_ERROR
@@ -36,11 +36,8 @@ const {
  * @returns controller to register new uiser
  */
 const create = (req, res) => {
-  const { username } = req.body;
-  const newUser = new UserModel({
-    username,
-    password: req.body.password
-  });
+  const { username, password } = req.body;
+  const newUser = new UserModel({ username, password });
 
   newUser.save()
     .then(() => {
@@ -53,38 +50,7 @@ const create = (req, res) => {
     });
 };
 
-// TODO: implemented later
-// HARD Delete a user by id
-// const remove = (req, res) => {
-//   // get user id
-//   const { id } = req.params;
-
-//   UserModel.findByIdAndDelete(id)
-//     .then((data) => {
-//       // case user not found
-//       if (!data) {
-//         res
-//           .status(NOT_FOUND)
-//           .send(
-//             formatResponse(
-//               `Cannot delete user with id= ${id}. Failed to find user with that id`,
-//               false,
-//               NOT_FOUND
-//             )
-//           );
-//       } else {
-//         res.send(
-//           formatResponse('Successfully delete user', true)
-//         );
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
-//     });
-// };
-
 export default {
-  // get,
   create
   // remove
 };

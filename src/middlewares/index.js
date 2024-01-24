@@ -1,2 +1,2 @@
-// eslint-disable-next-line import/prefer-default-export
+export { default as authenticate } from './authenticate';
 export { default as validate } from './validate';

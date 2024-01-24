@@ -43,7 +43,7 @@ app.use(router);
  * setup express middleware
  */
 app.use((req, res) => {
-  res.status(NOT_FOUND).json(formatResponse('Not found', false, NOT_FOUND));
+  res.status(NOT_FOUND).json(formatResponse('Route not found', false, NOT_FOUND));
 });
 
 export default app;

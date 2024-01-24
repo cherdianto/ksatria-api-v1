@@ -3,7 +3,8 @@
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
-import config from '../config';
+import config from '../../config';
+import constant from '../../constant';
 
 /**
  * user model schema definition
@@ -18,7 +19,14 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
-  }
+  },
+  roles: {
+    type: String,
+    enum: constant.userRole,
+    default: 'user'
+  },
+  refreshToken: String,
+  refreshTokenExp: Date
 }, { timestamps: true });
 
 /**
@@ -38,5 +46,17 @@ UserSchema.pre('save', function (next) {
     next();
   });
 });
+
+/**
+ * user model schema methods configuration
+ * intended to compare inputted and saved password
+ */
+UserSchema.methods.comparePassword = function (candidatePassword, cb) {
+  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
+    if (err) return cb(err);
+
+    cb(null, isMatch);
+  });
+};
 
 export default mongoose.model('User', UserSchema);
