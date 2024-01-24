@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { validate } from '../../middlewares';
+import { validate, authenticate } from '../../middlewares';
 import AuthController from './auth.controller';
 import AuthValidation from './auth.validation';
 
@@ -11,8 +11,8 @@ router
   .route('/login')
   .post(validate(AuthValidation.login), AuthController.login);
 
-// router
-//   .route('/signout')
-//   .get(UserController.get);
+router
+  .route('/refresh')
+  .post(authenticate.refresh, AuthController.refresh);
 
 export default router;

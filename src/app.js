@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import morganBody from 'morgan-body';
+import cookieParser from 'cookie-parser';
 import { StatusCodes } from 'http-status-codes';
 
 import router from './routes.index';
@@ -30,6 +31,7 @@ morganBody(app, {
  * setup express app
  */
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

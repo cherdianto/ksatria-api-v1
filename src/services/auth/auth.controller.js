@@ -52,6 +52,23 @@ const login = (req, res) => {
     });
 };
 
+/**
+ * refresh
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling refresh access token
+ */
+const refresh = (req, res) => {
+  const { user: username, roles } = req;
+  const tokenPayload = { username, roles };
+
+  res
+    .header('Authorization', jwt.generateAccessToken(tokenPayload))
+    .status(OK)
+    .send(formatResponse('Successfully refresh token', true, undefined, { username }));
+};
+
 export default {
-  login
+  login,
+  refresh
 };

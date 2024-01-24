@@ -12,7 +12,7 @@ router
   .route('/register')
   .post(
     validate(UserValidation.register),
-    authenticate(constant.rootRoleOnly),
+    authenticate.auth(constant.rootRoleOnly),
     UserController.create
   );
 
