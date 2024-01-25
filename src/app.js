@@ -7,7 +7,7 @@ import { StatusCodes } from 'http-status-codes';
 import router from './routes.index';
 import { formatResponse, logger } from './util';
 
-const { NOT_FOUND } = StatusCodes;
+const { OK, NOT_FOUND } = StatusCodes;
 
 /**
  * express app
@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: false }));
 /**
  * setup express route
  */
-app.get('/ping', (req, res) => res.send('pong'));
+app.get('/ping', (req, res) => res.status(OK).send(formatResponse('pong', true)));
 app.use(router);
 
 /**
