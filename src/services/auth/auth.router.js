@@ -17,11 +17,18 @@ router
   .post(validate(AuthValidation.login), AuthController.login);
 
 /**
- * routes for refreshing token
+ * routes for logout user
  */
 router
-  .route('/refresh')
-  .post(authenticate.refresh, AuthController.refresh);
+  .route('/logout')
+  .post(authenticate.auth(constant.userRole), AuthController.logout);
+
+/**
+ * routes for ping logged in user
+ */
+router
+  .route('/ping')
+  .post(authenticate.auth, AuthController.refresh);
 
 /**
  * routes for ping logged in user

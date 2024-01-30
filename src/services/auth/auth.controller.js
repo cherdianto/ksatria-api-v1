@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { UserModel } from '../user';
 import { formatResponse, jwt } from '../../util';
+import constant from '../../constant';
 
 const {
   OK, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED
@@ -10,6 +11,7 @@ const {
 
 /**
  * login
+ *
  * @param {Object} req - express req
  * @param {Object} res - express res
  * @returns controller to handling login and issue a token
@@ -21,13 +23,13 @@ const login = (req, res) => {
     .then((user) => {
       // handle user not found
       if (!user) {
-        res.status(NOT_FOUND).send(
-          formatResponse(`Can't found user with username: ${username}`, true, NOT_FOUND)
+        return res.status(NOT_FOUND).send(
+          formatResponse('Username doesn\'t exist', true, NOT_FOUND)
         );
       }
 
       // handle wrong password
-      user.comparePassword(password, (err, isMatch) => {
+      return user.comparePassword(password, (err, isMatch) => {
         if (err) throw err;
 
         if (isMatch) {
@@ -36,10 +38,11 @@ const login = (req, res) => {
           const tokenPayload = { username: user.username, roles: user.roles };
 
           return res
-            .cookie('refreshToken', jwt.generateRefreshToken(tokenPayload), { httpOnly: true, sameSite: 'strict' })
-            .header('Authorization', jwt.generateAccessToken(tokenPayload))
+            .cookie('refreshToken', jwt.generateRefreshToken(tokenPayload), constant.cookieOptions(false))
             .status(OK)
-            .send(formatResponse('Successfully login', true, undefined, { username: user.username }));
+            .send(formatResponse('Successfully login', true, undefined, {
+              token: jwt.generateAccessToken(tokenPayload)
+            }));
         }
 
         return res.status(UNAUTHORIZED).send(
@@ -54,6 +57,7 @@ const login = (req, res) => {
 
 /**
  * refresh
+ *
  * @param {Object} req - express req
  * @param {Object} res - express res
  * @returns controller to handling refresh access token
@@ -63,12 +67,24 @@ const refresh = (req, res) => {
   const tokenPayload = { username, roles };
 
   res
-    .header('Authorization', jwt.generateAccessToken(tokenPayload))
     .status(OK)
-    .send(formatResponse('Successfully refresh token', true, undefined, { username }));
+    .send(formatResponse('Successfully refresh token', true, undefined, { token: jwt.generateAccessToken(tokenPayload) }));
 };
+
+/**
+ * logout
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling logout and remove cookie
+ */
+const logout = (req, res) => res
+  .cookie('refreshToken', '', constant.cookieOptions(true))
+  .status(OK)
+  .send(formatResponse('Successfully logout', true));
 
 export default {
   login,
-  refresh
+  refresh,
+  logout
 };

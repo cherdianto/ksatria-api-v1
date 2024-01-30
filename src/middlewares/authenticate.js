@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 
 import config from '../config';
-import { formatResponse } from '../util';
+import { formatResponse, logger } from '../util';
 
-const { BAD_REQUEST, UNAUTHORIZED } = StatusCodes;
+const { UNAUTHORIZED } = StatusCodes;
 
 /**
  * checkRefreshToken
@@ -37,7 +37,9 @@ const refresh = (req, res, next) => {
     req.roles = roles;
     next();
   } catch (error) {
-    res.status(BAD_REQUEST).send(formatResponse(error.message, false, BAD_REQUEST));
+    logger.error('Failed to Authorized', error);
+
+    res.status(UNAUTHORIZED).send(formatResponse('Unauthorized', false, UNAUTHORIZED));
   }
 };
 
@@ -51,7 +53,7 @@ const refresh = (req, res, next) => {
  * @returns middleware to check if user can access the route
  */
 const auth = (allowedRoles) => async (req, res, next) => {
-  const accessToken = req.headers?.authorization;
+  const accessToken = req.headers?.authorization?.split(' ')[1];
 
   if (!accessToken) return res.status(UNAUTHORIZED).send(formatResponse('Access denied. No access token provided.', false, UNAUTHORIZED));
 
@@ -65,7 +67,9 @@ const auth = (allowedRoles) => async (req, res, next) => {
     req.user = username;
     return next();
   } catch (error) {
-    return res.status(BAD_REQUEST).send(formatResponse(error.message, false, BAD_REQUEST));
+    logger.error('Failed to Authorized', error);
+
+    return res.status(UNAUTHORIZED).send(formatResponse('Unauthorized', false, UNAUTHORIZED));
   }
 };
 

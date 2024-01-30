@@ -4,6 +4,7 @@ import morganBody from 'morgan-body';
 import cookieParser from 'cookie-parser';
 import { StatusCodes } from 'http-status-codes';
 
+import config from './config';
 import router from './routes.index';
 import { formatResponse, logger } from './util';
 
@@ -30,7 +31,11 @@ morganBody(app, {
 /**
  * setup express app
  */
-app.use(cors());
+app.use(cors({
+  origin: [config.cors],
+  credentials: true,
+  optionSuccessStatus: 200
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
