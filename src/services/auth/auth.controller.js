@@ -1,9 +1,8 @@
-/* eslint-disable no-param-reassign */
 import { StatusCodes } from 'http-status-codes';
 
 import { UserModel } from '../user';
 import { formatResponse, jwt } from '../../util';
-import constant from '../../constant';
+import constants from '../../constants';
 
 const {
   OK, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED
@@ -38,7 +37,7 @@ const login = (req, res) => {
           const tokenPayload = { username: user.username, roles: user.roles };
 
           return res
-            .cookie('refreshToken', jwt.generateRefreshToken(tokenPayload), constant.cookieOptions(false))
+            .cookie('refreshToken', jwt.generateRefreshToken(tokenPayload), constants.cookieOptions(false))
             .status(OK)
             .send(formatResponse('Successfully login', true, undefined, {
               token: jwt.generateAccessToken(tokenPayload)
@@ -79,7 +78,7 @@ const refresh = (req, res) => {
  * @returns controller to handling logout and remove cookie
  */
 const logout = (req, res) => res
-  .cookie('refreshToken', '', constant.cookieOptions(true))
+  .cookie('refreshToken', '', constants.cookieOptions(true))
   .status(OK)
   .send(formatResponse('Successfully logout', true));
 

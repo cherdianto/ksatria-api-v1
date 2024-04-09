@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
 import config from '../../config';
-import constant from '../../constant';
+import constants from '../../constants';
 
 /**
  * user model schema definition
@@ -22,11 +22,9 @@ const UserSchema = new mongoose.Schema({
   },
   roles: {
     type: String,
-    enum: constant.userRole,
+    enum: constants.USER_ROLE,
     default: 'user'
-  },
-  refreshToken: String,
-  refreshTokenExp: Date
+  }
 }, { timestamps: true });
 
 /**

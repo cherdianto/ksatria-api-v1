@@ -1,7 +1,10 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
+import constants from './constants';
 import logger from './util/logger';
+
+const { DEFAULT_PORT, DEFAULT_SALT_FACTOR, EMPTY_STRING } = constants;
 
 /**
  * setup environment variable
@@ -18,10 +21,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export default {
-  port: process.env.PORT || 8000,
-  cors: process.env.CORS || '',
-  mongoose: { uri: process.env.MONGODB_URI || '' },
-  saltFactor: Number(process.env.SALT_WORK_FACTOR) || 10,
+  port: process.env.PORT || DEFAULT_PORT,
+  cors: process.env.CORS || EMPTY_STRING,
+  mongoose: { uri: process.env.MONGODB_URI || EMPTY_STRING },
+  saltFactor: Number(process.env.SALT_WORK_FACTOR) || DEFAULT_SALT_FACTOR,
   secretKey: process.env.SECRET_KEY,
-  secretKeyRefresh: process.env.SECRET_KEY_REFRESH
+  secretKeyRefresh: process.env.SECRET_KEY_REFRESH,
+  totalModules: process.env.TOTAL_MODULES
 };

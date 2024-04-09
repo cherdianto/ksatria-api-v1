@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import constant from '../../constant';
+import constants from '../../constants';
 import { formatResponse } from '../../util';
 import { validate, authenticate } from '../../middlewares';
 import AuthController from './auth.controller';
@@ -21,7 +21,7 @@ router
  */
 router
   .route('/logout')
-  .post(authenticate.auth(constant.userRole), AuthController.logout);
+  .post(authenticate.auth(constants.USER_ROLE), AuthController.logout);
 
 /**
  * routes for ping logged in user
@@ -35,6 +35,6 @@ router
  */
 router
   .route('/ping')
-  .get(authenticate.auth(constant.userRole), (req, res) => res.status(StatusCodes.OK).send(formatResponse('pong, authorized.', true)));
+  .get(authenticate.auth(constants.USER_ROLE), (req, res) => res.status(StatusCodes.OK).send(formatResponse('pong, authorized.', true)));
 
 export default router;
