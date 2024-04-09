@@ -6,6 +6,10 @@ import mongoose from 'mongoose';
 import config from '../../config';
 import constants from '../../constants';
 
+const {
+  USER, USER_ROLE, LOCKED, UNLOCKED
+} = constants;
+
 /**
  * user model schema definition
  */
@@ -22,8 +26,20 @@ const UserSchema = new mongoose.Schema({
   },
   roles: {
     type: String,
-    enum: constants.USER_ROLE,
-    default: 'user'
+    enum: USER_ROLE,
+    default: USER
+  },
+  modules: {
+    type: Object,
+    default: {
+      '00': UNLOCKED,
+      '01': LOCKED,
+      '02': LOCKED,
+      '03': LOCKED,
+      '04': LOCKED,
+      '05': LOCKED,
+      '06': LOCKED
+    }
   }
 }, { timestamps: true });
 

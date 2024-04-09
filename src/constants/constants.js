@@ -9,6 +9,9 @@ export default {
   EMPTY_STRING: '',
 
   // role constant
+  USER: 'user',
+  ADMIN: 'admin',
+  ROOT: 'root',
   USER_ROLE: ['root', 'admin', 'user'],
   ADMIN_ROLE_ONLY: ['root', 'admin'],
   ROOT_ROLE_ONLY: ['root'],
@@ -18,5 +21,11 @@ export default {
     maxAge: signOut ? 0 : 8 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: 'strict'
-  })
+  }),
+
+  // modules
+  LOCKED: 0,
+  UNLOCKED: 1,
+  IN_PROGRESS: 2,
+  FINISHED: 3
 };

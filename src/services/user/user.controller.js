@@ -4,7 +4,7 @@ import UserModel from './user.model';
 import { formatResponse } from '../../util';
 
 const {
-  CREATED, INTERNAL_SERVER_ERROR
+  OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR
 } = StatusCodes;
 
 // Getting all user
@@ -33,7 +33,7 @@ const {
  * create new user
  * @param {Object} req - express req
  * @param {Object} res - express res
- * @returns controller to register new uiser
+ * @returns controller to register new user
  */
 const create = (req, res) => {
   const { username, password } = req.body;
@@ -46,11 +46,39 @@ const create = (req, res) => {
       );
     })
     .catch((err) => {
+      res.status().send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * get user modules status
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to get user modules status
+ */
+const getModules = (req, res) => {
+  const { username } = req;
+
+  UserModel.findOne({ username })
+    .then((user) => {
+      const { modules } = user;
+      // handle user not found
+      if (!user) {
+        return res.status(NOT_FOUND).send(
+          formatResponse('Username doesn\'t exist', true, NOT_FOUND)
+        );
+      }
+
+      return res.status(OK).send(
+        formatResponse('Successfully retrieve user modules', true, undefined, { modules })
+      );
+    })
+    .catch((err) => {
       res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
     });
 };
 
 export default {
-  create
-  // remove
+  create,
+  getModules
 };

@@ -62,7 +62,7 @@ const login = (req, res) => {
  * @returns controller to handling refresh access token
  */
 const refresh = (req, res) => {
-  const { user: username, roles } = req;
+  const { username, roles } = req;
   const tokenPayload = { username, roles };
 
   res

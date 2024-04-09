@@ -33,7 +33,7 @@ const _checkRefreshToken = (req) => {
 const refresh = (req, res, next) => {
   try {
     const { username, roles } = _checkRefreshToken(req);
-    req.user = username;
+    req.username = username;
     req.roles = roles;
     next();
   } catch (error) {
@@ -64,7 +64,7 @@ const auth = (allowedRoles) => async (req, res, next) => {
 
     if (!allowedRoles.includes(roles)) return res.status(UNAUTHORIZED).send(formatResponse('Access denied.', false, UNAUTHORIZED));
 
-    req.user = username;
+    req.username = username;
     return next();
   } catch (error) {
     logger.error('Failed to Authorized', error);
