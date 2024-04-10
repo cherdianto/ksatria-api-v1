@@ -25,7 +25,9 @@ const {
 //       );
 //     })
 //     .catch((err) => {
-//       res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+//       res
+// .status(INTERNAL_SERVER_ERROR)
+// .send(formatResponse(err.message, false));
 //     });
 // };
 
@@ -46,7 +48,7 @@ const create = (req, res) => {
       );
     })
     .catch((err) => {
-      res.status().send(formatResponse(err.message, false));
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
     });
 };
 

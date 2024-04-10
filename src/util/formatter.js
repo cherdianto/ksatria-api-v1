@@ -13,12 +13,12 @@ import { StatusCodes } from 'http-status-codes';
 const formatResponse = (
   message,
   success = true,
-  errorCode = StatusCodes.INTERNAL_SERVER_ERROR,
+  errCode = null,
   data = {}
 ) => ({
   success,
   message,
-  ...(!success && { errorCode }),
+  errorCode: errCode || (success ? null : StatusCodes.INTERNAL_SERVER_ERROR),
   data
 });
 
