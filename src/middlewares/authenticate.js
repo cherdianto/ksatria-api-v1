@@ -32,7 +32,8 @@ const _checkRefreshToken = (req) => {
  */
 const refresh = (req, res, next) => {
   try {
-    const { username, roles } = _checkRefreshToken(req);
+    const { userId, username, roles } = _checkRefreshToken(req);
+    req.userId = userId;
     req.username = username;
     req.roles = roles;
     next();
@@ -60,10 +61,11 @@ const auth = (allowedRoles) => async (req, res, next) => {
   try {
     await _checkRefreshToken(req, res);
     // get username and roles
-    const { username, roles } = jwt.verify(accessToken, config.secretKey);
+    const { userId, username, roles } = jwt.verify(accessToken, config.secretKey);
 
     if (!allowedRoles.includes(roles)) return res.status(UNAUTHORIZED).send(formatResponse('Access denied.', false, UNAUTHORIZED));
 
+    req.userId = userId;
     req.username = username;
     return next();
   } catch (error) {

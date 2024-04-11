@@ -6,7 +6,7 @@ import Joi from 'joi';
  */
 const register = {
   body: Joi.object().keys({
-    moduleId: Joi.string()
+    moduleUUID: Joi.string()
       .required()
       .min(2)
       .max(2)
@@ -21,7 +21,7 @@ const register = {
  */
 const getModule = {
   body: Joi.object().keys({
-    moduleId: Joi.string()
+    moduleUUID: Joi.string()
       .required()
       .min(2)
       .max(2)

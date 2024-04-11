@@ -14,13 +14,13 @@ const {
  * @returns controller to register new module
  */
 const create = (req, res) => {
-  const { moduleId, moduleContent } = req.body;
-  const newModule = new ModuleModel({ moduleId, moduleContent });
+  const { moduleUUID, moduleContent } = req.body;
+  const newModule = new ModuleModel({ moduleUUID, moduleContent });
 
   newModule.save()
     .then(() => {
       res.status(CREATED).send(
-        formatResponse(`Successfully register module: ${moduleId}`, true)
+        formatResponse(`Successfully register module: ${moduleUUID}`, true)
       );
     })
     .catch((err) => {
@@ -35,9 +35,9 @@ const create = (req, res) => {
  * @returns controller to get specific module
  */
 const get = (req, res) => {
-  const { moduleId, language } = req.body;
+  const { moduleUUID, language } = req.body;
 
-  ModuleModel.findOne({ moduleId })
+  ModuleModel.findOne({ moduleUUID })
     .then((module) => {
       // handle module not found
       if (!module) {
@@ -49,7 +49,7 @@ const get = (req, res) => {
       return res.status(OK).send(
         formatResponse('Successfully retrieve module', true, undefined, {
           id: module._id,
-          moduleId: module.moduleId,
+          moduleUUID: module.moduleUUID,
           contents: module.moduleContent[language] || {}
         })
       );

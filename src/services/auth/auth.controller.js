@@ -34,7 +34,7 @@ const login = (req, res) => {
         if (isMatch) {
           // generate refresh and access token then send it
           // do not use username from payload just in case there's a mismatch with data in db
-          const tokenPayload = { username: user.username, roles: user.roles };
+          const tokenPayload = { userId: user._id, username: user.username, roles: user.roles };
 
           return res
             .cookie('refreshToken', jwt.generateRefreshToken(tokenPayload), constants.cookieOptions(false))
@@ -62,8 +62,8 @@ const login = (req, res) => {
  * @returns controller to handling refresh access token
  */
 const refresh = (req, res) => {
-  const { username, roles } = req;
-  const tokenPayload = { username, roles };
+  const { userId, username, roles } = req;
+  const tokenPayload = { userId, username, roles };
 
   res
     .status(OK)

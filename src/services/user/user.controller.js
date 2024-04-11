@@ -80,7 +80,18 @@ const getModules = (req, res) => {
     });
 };
 
+/**
+ * updateUserData
+ *
+ * @param {string} userId - user Id
+ * @param {Object} newData - new user data
+ * @returns controller to handling update some user data
+ */
+const updateUserData = (userId, newData) => UserModel
+  .findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
+
 export default {
   create,
-  getModules
+  getModules,
+  updateUserData
 };

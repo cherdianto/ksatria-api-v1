@@ -1,6 +1,11 @@
 import express from 'express';
 
-import { AuthRouter, UserRouter, ModuleRouter } from './services';
+import {
+  AuthRouter,
+  AssignmentRouter,
+  ModuleRouter,
+  UserRouter
+} from './services';
 
 /**
  * express router
@@ -16,6 +21,10 @@ const defaultRoutes = [
   {
     path: '/auth',
     route: AuthRouter
+  },
+  {
+    path: '/assignment',
+    route: AssignmentRouter
   },
   {
     path: '/module',
