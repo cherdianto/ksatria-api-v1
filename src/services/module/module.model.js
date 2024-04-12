@@ -5,10 +5,9 @@ import mongoose from 'mongoose';
  */
 const ModuleSchema = new mongoose.Schema({
   moduleUUID: {
-    type: String,
+    type: Number,
     required: true,
-    unique: true,
-    max: 2
+    unique: true
   },
   moduleContent: {
     type: Object,

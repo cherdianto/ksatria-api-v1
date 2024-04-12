@@ -20,7 +20,7 @@ const create = (req, res) => {
   newModule.save()
     .then(() => {
       res.status(CREATED).send(
-        formatResponse(`Successfully register module: ${moduleUUID}`, true)
+        formatResponse(`Successfully register module ${moduleUUID}`, true)
       );
     })
     .catch((err) => {

@@ -7,11 +7,7 @@ import Joi from 'joi';
 const save = {
   body: Joi.object().keys({
     moduleId: Joi.string().hex().length(24).required(),
-    moduleUUID: Joi.string()
-      .required()
-      .min(2)
-      .max(2)
-      .alphanum(),
+    moduleUUID: Joi.number().required(),
     currentProgress: Joi.number().required(),
     totalProgress: Joi.number().required(),
     saveData: Joi.array().required().items(
