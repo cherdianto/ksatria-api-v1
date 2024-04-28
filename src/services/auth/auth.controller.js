@@ -65,7 +65,7 @@ const refresh = (req, res) => {
   const { userId, username, roles } = req;
   const tokenPayload = { userId, username, roles };
 
-  res
+  return res
     .status(OK)
     .send(formatResponse('Successfully refresh token', true, undefined, { token: jwt.generateAccessToken(tokenPayload) }));
 };

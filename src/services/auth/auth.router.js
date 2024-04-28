@@ -28,7 +28,7 @@ router
  */
 router
   .route('/refresh')
-  .post(authenticate.auth, AuthController.refresh);
+  .post(authenticate.refresh, AuthController.refresh);
 
 /**
  * routes for ping logged in user

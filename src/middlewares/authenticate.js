@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import config from '../config';
 import { formatResponse, logger } from '../util';
 
-const { UNAUTHORIZED } = StatusCodes;
+const { UNAUTHORIZED, FORBIDDEN } = StatusCodes;
 
 /**
  * checkRefreshToken
@@ -63,7 +63,7 @@ const auth = (allowedRoles) => async (req, res, next) => {
     // get username and roles
     const { userId, username, roles } = jwt.verify(accessToken, config.secretKey);
 
-    if (!allowedRoles.includes(roles)) return res.status(UNAUTHORIZED).send(formatResponse('Access denied.', false, UNAUTHORIZED));
+    if (!allowedRoles.includes(roles)) return res.status(FORBIDDEN).send(formatResponse('Access denied.', false, FORBIDDEN));
 
     req.userId = userId;
     req.username = username;
