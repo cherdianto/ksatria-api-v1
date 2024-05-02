@@ -27,5 +27,6 @@ export default {
   LOCKED: 0,
   UNLOCKED: 1,
   IN_PROGRESS: 2,
-  FINISHED: 3
+  FINISHED: 3,
+  INTRO_MODULE: 0
 };

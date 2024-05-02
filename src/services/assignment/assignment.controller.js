@@ -1,15 +1,30 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { UserController } from '../user';
-import AssignmentModel from './assignment.model';
 import { formatResponse } from '../../util';
 import constants from '../../constants';
+
+import AssignmentModel from './assignment.model';
 
 const {
   OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR
 } = StatusCodes;
 
-const { IN_PROGRESS, FINISHED } = constants;
+const { IN_PROGRESS, FINISHED, INTRO_MODULE } = constants;
+
+/**
+ * updateIntro
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling update intro status
+ */
+const updateIntro = (req, res) => UserController
+  .updateUserData(req?.userId, { [`modules.${INTRO_MODULE}`]: FINISHED })
+  .then(() => res.status(OK).send(
+    formatResponse('Successfully update tutorial status', true)
+  ))
+  .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
 
 /**
  * save
@@ -79,6 +94,7 @@ const load = (req, res) => {
 };
 
 export default {
+  updateIntro,
   save,
   load
 };
