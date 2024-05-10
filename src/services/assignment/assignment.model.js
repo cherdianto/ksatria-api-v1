@@ -25,16 +25,23 @@ const AssignmentSchema = new mongoose.Schema({
     required: true
   },
   saveData: {
-    type: [{
+    type: Map,
+    required: true,
+    of: {
+      _id: false,
       assignmentId: {
         type: String,
         required: true
       },
-      assignmentData: {
+      question: {
+        type: mongoose.Mixed,
+        required: true
+      },
+      answer: {
         type: mongoose.Mixed,
         required: true
       }
-    }]
+    }
   },
   progress: {
     type: Number,

@@ -53,8 +53,13 @@ const save = (req, res) => {
   }
 
   AssignmentModel.findOneAndUpdate({ userId, moduleId }, newSave, { upsert: true, new: true })
-    .then(() => res.status(CREATED).send(
-      formatResponse('Successfully save assignment', true)
+    .then((assignment) => res.status(CREATED).send(
+      formatResponse('Successfully save assignment', true, undefined, {
+        currentProgress: assignment.currentProgress,
+        totalProgress: assignment.totalProgress,
+        saveData: assignment.saveData,
+        progress: assignment.progress
+      })
     ))
     .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
 };
@@ -93,8 +98,19 @@ const load = (req, res) => {
     });
 };
 
+/**
+ * getSaveData
+ *
+ * @param {string} userId - user Id
+ * @param {string} moduleId - module Id
+ * @returns get save data for spesific user and module
+ */
+const getSaveData = (userId, moduleId) => AssignmentModel
+  .findOne({ userId, moduleId }).exec();
+
 export default {
   updateIntro,
   save,
-  load
+  load,
+  getSaveData
 };

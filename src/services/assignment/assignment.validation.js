@@ -10,10 +10,12 @@ const save = {
     moduleUUID: Joi.number().required(),
     currentProgress: Joi.number().required(),
     totalProgress: Joi.number().required(),
-    saveData: Joi.array().required().items(
+    saveData: Joi.object().required().pattern(
+      Joi.string(),
       Joi.object().keys({
-        assignmentId: Joi.string().required().min(2).alphanum(),
-        assignmentData: Joi.any().required()
+        assignmentId: Joi.string().required().min(2),
+        question: Joi.any().required(),
+        answer: Joi.any().required()
       })
     )
   })

@@ -16,7 +16,7 @@ const register = {
  * @constant
  */
 const getModule = {
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     moduleUUID: Joi.number().required(),
     language: Joi.string().required().min(2).alphanum()
   })

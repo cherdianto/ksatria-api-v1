@@ -1,6 +1,7 @@
 import cors from 'cors';
-import express from 'express';
-import morganBody from 'morgan-body';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+import express from 'express'; import morganBody from 'morgan-body';
 import cookieParser from 'cookie-parser';
 import { StatusCodes } from 'http-status-codes';
 
@@ -8,6 +9,8 @@ import config from './config';
 import router from './routes.index';
 import { formatResponse, logger } from './util';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const { OK, NOT_FOUND } = StatusCodes;
 
 /**
@@ -37,6 +40,7 @@ app.use(cors({
   optionSuccessStatus: 200
 }));
 app.use(cookieParser());
+app.use('/asset', express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
