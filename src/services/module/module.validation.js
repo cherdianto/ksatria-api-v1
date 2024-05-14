@@ -6,7 +6,7 @@ import Joi from 'joi';
  */
 const register = {
   body: Joi.object().keys({
-    moduleUUID: Joi.number().required(),
+    moduleUUID: Joi.string().required(),
     moduleContent: Joi.object().required()
   })
 };
@@ -17,7 +17,7 @@ const register = {
  */
 const getModule = {
   query: Joi.object().keys({
-    moduleUUID: Joi.number().required(),
+    moduleUUID: Joi.string().required(),
     language: Joi.string().required().min(2).alphanum()
   })
 };

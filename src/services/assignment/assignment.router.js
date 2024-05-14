@@ -10,6 +10,17 @@ const { USER_ROLE } = constants;
 const router = Router();
 
 /**
+ * routes for save assignment
+ */
+router
+  .route('/')
+  .get(
+    validate(AssignmentValidation.get),
+    authenticate.auth(USER_ROLE),
+    AssignmentController.get
+  );
+
+/**
  * routes for update intro
  */
 router

@@ -13,7 +13,7 @@ const AssignmentSchema = new mongoose.Schema({
     required: true
   },
   moduleUUID: {
-    type: Number,
+    type: String,
     required: true
   },
   currentProgress: {

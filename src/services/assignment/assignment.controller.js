@@ -10,7 +10,48 @@ const {
   OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR
 } = StatusCodes;
 
-const { IN_PROGRESS, FINISHED, INTRO_MODULE } = constants;
+const {
+  UNLOCKED,
+  IN_PROGRESS,
+  FINISHED,
+  INTERVENTION_MODULE,
+  ASSIGNMENT_MODULE,
+  INTRO_MODULE,
+  FIRST_MODULE
+} = constants;
+
+/**
+ * get
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling get assignment based on id
+ */
+const get = (req, res) => {
+  const { userId, query: { moduleUUID, assignmentId } } = req;
+
+  AssignmentModel.findOne({ userId, moduleUUID })
+    .then((assignment) => {
+      // handle save data not found
+      if (!assignment) {
+        return res.status(NOT_FOUND).send(
+          formatResponse('No save data found.', true, NOT_FOUND)
+        );
+      }
+
+      const { saveData } = assignment;
+      const mappedAssignment = Array.isArray(assignmentId)
+        ? assignmentId.reduce((prev, id) => ({ ...prev, [id]: saveData.get(id) }), {})
+        : { [assignmentId]: saveData.get(assignmentId) };
+
+      return res.status(OK).send(
+        formatResponse('Successfully retrieve sava data', true, undefined, { assignment: mappedAssignment })
+      );
+    })
+    .catch((err) => {
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+    });
+};
 
 /**
  * updateIntro
@@ -20,7 +61,7 @@ const { IN_PROGRESS, FINISHED, INTRO_MODULE } = constants;
  * @returns controller to handling update intro status
  */
 const updateIntro = (req, res) => UserController
-  .updateUserData(req?.userId, { [`modules.${INTRO_MODULE}`]: FINISHED })
+  .updateUserData(req?.userId, { [`modules.${INTERVENTION_MODULE}.${INTRO_MODULE}`]: FINISHED, [`modules.${INTERVENTION_MODULE}.${FIRST_MODULE}`]: UNLOCKED })
   .then(() => res.status(OK).send(
     formatResponse('Successfully update tutorial status', true)
   ))
@@ -48,7 +89,13 @@ const save = (req, res) => {
   };
 
   if (currentProgress === totalProgress) {
-    UserController.updateUserData(userId, { [`modules.${moduleId}`]: FINISHED })
+    const [moduleCode, moduleNumber] = moduleUUID.split('_');
+
+    const updatedModule = { [`modules.${moduleCode}.${moduleNumber}`]: FINISHED };
+
+    const updatedData = moduleCode === INTERVENTION_MODULE ? { ...updatedModule, [`modules.${ASSIGNMENT_MODULE}.${moduleNumber}`]: UNLOCKED } : updatedModule;
+
+    UserController.updateUserData(userId, updatedData)
       .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
   }
 
@@ -109,6 +156,7 @@ const getSaveData = (userId, moduleId) => AssignmentModel
   .findOne({ userId, moduleId }).exec();
 
 export default {
+  get,
   updateIntro,
   save,
   load,

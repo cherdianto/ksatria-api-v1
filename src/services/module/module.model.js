@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
  */
 const ModuleSchema = new mongoose.Schema({
   moduleUUID: {
-    type: Number,
+    type: String,
     required: true,
     unique: true
   },

@@ -32,13 +32,23 @@ const UserSchema = new mongoose.Schema({
   modules: {
     type: Object,
     default: {
-      0: UNLOCKED,
-      1: LOCKED,
-      2: LOCKED,
-      3: LOCKED,
-      4: LOCKED,
-      5: LOCKED,
-      6: LOCKED
+      MI: {
+        0: UNLOCKED,
+        1: LOCKED,
+        2: LOCKED,
+        3: LOCKED,
+        4: LOCKED,
+        5: LOCKED,
+        6: LOCKED
+      },
+      MA: {
+        1: LOCKED,
+        2: LOCKED,
+        3: LOCKED,
+        4: LOCKED,
+        5: LOCKED,
+        6: LOCKED
+      }
     }
   }
 }, { timestamps: true });
