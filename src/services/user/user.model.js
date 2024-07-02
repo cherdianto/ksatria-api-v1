@@ -20,6 +20,11 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     max: 100
   },
+  fullname: {
+    type: String,
+    required: true,
+    max: 100
+  },
   password: {
     type: String,
     required: true
@@ -28,6 +33,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: USER_ROLE,
     default: USER
+  },
+  counselorId: {
+    type: mongoose.ObjectId
   },
   modules: {
     type: Object,

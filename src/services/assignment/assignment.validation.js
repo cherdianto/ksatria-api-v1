@@ -33,6 +33,21 @@ const save = {
 };
 
 /**
+ * validator for save data api
+ * @constant
+ */
+const feedback = {
+  body: Joi.object().keys({
+    userId: Joi.string().required(),
+    moduleId: Joi.string().required(),
+    feedbackData: Joi.object().required().pattern(
+      Joi.string(),
+      Joi.string()
+    )
+  })
+};
+
+/**
  * validator for load save data api
  * @constant
  */
@@ -45,5 +60,6 @@ const load = {
 export default {
   get,
   load,
-  save
+  save,
+  feedback
 };

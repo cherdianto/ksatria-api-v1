@@ -35,7 +35,7 @@ const create = (req, res) => {
  * @param {Object} res - express res
  * @returns controller to get specific module
  */
-const get = (req, res) => {
+const get = (isAdmin) => (req, res) => {
   const { moduleUUID, language } = req.query;
 
   ModuleModel.findOne({ moduleUUID })
@@ -47,20 +47,22 @@ const get = (req, res) => {
         );
       }
 
-      const _loadSaveData = await assignmentController.getSaveData(req.userId, module._id);
+      const userId = isAdmin ? req.query.userId : req.userId;
+      const _loadSaveData = await assignmentController.getSaveData(userId, module._id);
       let mappedSaveData = null;
 
       // attach user save data
       if (_loadSaveData) {
         const {
-          currentProgress, totalProgress, saveData, progress
+          currentProgress, totalProgress, saveData, progress, feedbackData
         } = _loadSaveData;
 
         mappedSaveData = {
           currentProgress,
           totalProgress,
           progress,
-          saveData
+          saveData,
+          feedbackData
         };
       }
 

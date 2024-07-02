@@ -16,8 +16,7 @@ const {
   FINISHED,
   INTERVENTION_MODULE,
   ASSIGNMENT_MODULE,
-  INTRO_MODULE,
-  FIRST_MODULE
+  MODULE_SEPARATOR
 } = constants;
 
 /**
@@ -54,20 +53,6 @@ const get = (req, res) => {
 };
 
 /**
- * updateIntro
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling update intro status
- */
-const updateIntro = (req, res) => UserController
-  .updateUserData(req?.userId, { [`modules.${INTERVENTION_MODULE}.${INTRO_MODULE}`]: FINISHED, [`modules.${INTERVENTION_MODULE}.${FIRST_MODULE}`]: UNLOCKED })
-  .then(() => res.status(OK).send(
-    formatResponse('Successfully update tutorial status', true)
-  ))
-  .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
-
-/**
  * save
  *
  * @param {Object} req - express req
@@ -89,7 +74,7 @@ const save = (req, res) => {
   };
 
   if (currentProgress === totalProgress) {
-    const [moduleCode, moduleNumber] = moduleUUID.split('_');
+    const [moduleCode, moduleNumber] = moduleUUID.split(MODULE_SEPARATOR);
 
     const updatedModule = { [`modules.${moduleCode}.${moduleNumber}`]: FINISHED };
 
@@ -105,7 +90,33 @@ const save = (req, res) => {
         currentProgress: assignment.currentProgress,
         totalProgress: assignment.totalProgress,
         saveData: assignment.saveData,
-        progress: assignment.progress
+        progress: assignment.progress,
+        feedbackData: assignment.feedbackData
+      })
+    ))
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
+};
+
+/**
+ * feedback
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling save feedback
+ */
+const feedback = (req, res) => {
+  const {
+    userId, moduleId, feedbackData
+  } = req.body;
+
+  AssignmentModel.findOneAndUpdate({ userId, moduleId }, { feedbackData }, { new: true })
+    .then((assignment) => res.status(CREATED).send(
+      formatResponse('Successfully save feedback', true, undefined, {
+        currentProgress: assignment.currentProgress,
+        totalProgress: assignment.totalProgress,
+        saveData: assignment.saveData,
+        progress: assignment.progress,
+        feedbackData: assignment.feedbackData
       })
     ))
     .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
@@ -157,8 +168,8 @@ const getSaveData = (userId, moduleId) => AssignmentModel
 
 export default {
   get,
-  updateIntro,
   save,
+  feedback,
   load,
   getSaveData
 };

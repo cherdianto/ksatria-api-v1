@@ -22,7 +22,20 @@ const getModule = {
   })
 };
 
+/**
+ * validator for get modules based on user id
+ * @constant
+ */
+const getStudentModule = {
+  query: Joi.object().keys({
+    userId: Joi.string().required(),
+    moduleUUID: Joi.string().required(),
+    language: Joi.string().required().min(2).alphanum()
+  })
+};
+
 export default {
   register,
-  getModule
+  getModule,
+  getStudentModule
 };

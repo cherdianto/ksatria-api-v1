@@ -5,7 +5,7 @@ import AssignmentController from './assignment.controller';
 import AssignmentValidation from './assignment.validation';
 import constants from '../../constants';
 
-const { USER_ROLE } = constants;
+const { USER_ROLE, COUNSELOR_ROLE_ONLY } = constants;
 
 const router = Router();
 
@@ -21,16 +21,6 @@ router
   );
 
 /**
- * routes for update intro
- */
-router
-  .route('/updateIntro')
-  .post(
-    authenticate.auth(USER_ROLE),
-    AssignmentController.updateIntro
-  );
-
-/**
  * routes for save assignment
  */
 router
@@ -39,6 +29,17 @@ router
     validate(AssignmentValidation.save),
     authenticate.auth(USER_ROLE),
     AssignmentController.save
+  );
+
+/**
+ * routes for save assignment
+ */
+router
+  .route('/feedback')
+  .post(
+    validate(AssignmentValidation.feedback),
+    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    AssignmentController.feedback
   );
 
 /**

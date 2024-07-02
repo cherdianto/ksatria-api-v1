@@ -10,11 +10,11 @@ export default {
 
   // role constant
   USER: 'user',
+  COUNSELOR: 'counselor',
   ADMIN: 'admin',
-  ROOT: 'root',
-  USER_ROLE: ['root', 'admin', 'user'],
-  ADMIN_ROLE_ONLY: ['root', 'admin'],
-  ROOT_ROLE_ONLY: ['root'],
+  USER_ROLE: ['admin', 'counselor', 'user'],
+  COUNSELOR_ROLE_ONLY: ['admin', 'counselor'],
+  ADMIN_ROLE_ONLY: ['admin'],
 
   // auth related
   cookieOptions: (signOut) => ({
@@ -31,5 +31,6 @@ export default {
   INTERVENTION_MODULE: 'MI',
   ASSIGNMENT_MODULE: 'MA',
   INTRO_MODULE: 0,
-  FIRST_MODULE: 1
+  FIRST_MODULE: 1,
+  MODULE_SEPARATOR: '_'
 };

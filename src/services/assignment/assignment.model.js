@@ -16,6 +16,10 @@ const AssignmentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  moduleLanguage: {
+    type: String,
+    required: true
+  },
   currentProgress: {
     type: Number,
     required: true
@@ -46,6 +50,10 @@ const AssignmentSchema = new mongoose.Schema({
   progress: {
     type: Number,
     required: true
+  },
+  feedbackData: {
+    type: Map,
+    of: String
   }
 }, { timestamps: true, minimize: false });
 
