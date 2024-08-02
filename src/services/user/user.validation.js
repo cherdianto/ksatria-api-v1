@@ -41,7 +41,7 @@ const register = {
         .min(2)
         .max(100),
     password: Joi.string().required(),
-    counselorId: Joi.string()
+    // counselorId: Joi.string()
   })
 };
 

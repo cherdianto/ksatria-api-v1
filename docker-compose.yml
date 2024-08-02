@@ -1,0 +1,36 @@
+version: '3'
+services:
+  ksatria-v1-api:
+    image: webcreatia/ksatria-v1-api:v1.0
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/ksatria
+    depends_on:
+      - mongo
+    networks:
+      - ksatria-v1-net
+
+  mongo:
+    image: mongo:4.4
+    volumes:
+      - mongo-data:/data/db  # Mount a volume to persist MongoDB data
+    ports:
+      - "27017:27017"
+    networks:
+      - ksatria-v1-net
+  
+  ksatria-v1-client:
+    image: webcreatia/ksatria-v1-client:v1.0
+    ports:
+      - "3001:3001"
+    depends_on:
+      - ksatria-v1-api
+    networks:
+      - ksatria-v1-net
+
+volumes:
+  mongo-data:  # Define the volume for MongoDB data persistence
+
+networks:
+  ksatria-v1-net:

@@ -20,7 +20,9 @@ export default {
   cookieOptions: (signOut) => ({
     maxAge: signOut ? 0 : 8 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'strict'
+    // CANDRA : NEED TO RUN ON LOCAL , IT SHOULD BE STRICT
+    secure: true,
+    sameSite: 'None'
   }),
 
   // modules

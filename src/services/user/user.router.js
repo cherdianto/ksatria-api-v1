@@ -43,8 +43,9 @@ router
 router
   .route('/register')
   .post(
-    validate(UserValidation.register),
-    authenticate.auth(ADMIN_ROLE_ONLY),
+    // validate(UserValidation.register),
+    // CANDRA: temporarely disabled for stagin deployment
+    // authenticate.auth(ADMIN_ROLE_ONLY), 
     UserController.create
   );
 

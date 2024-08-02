@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/assignment/assignment.controller.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/assignment/assignment.controller.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { StatusCodes } from 'http-status-codes';
+
+import { UserController } from '../user';
+import { formatResponse } from '../../util';
+import constants from '../../constants';
+
+import AssignmentModel from './assignment.model';
+
+const {
+  OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR
+} = StatusCodes;
+
+const {
+  UNLOCKED,
+  IN_PROGRESS,
+  FINISHED,
+  INTERVENTION_MODULE,
+  ASSIGNMENT_MODULE,
+  MODULE_SEPARATOR
+} = constants;
+
+/**
+ * get
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling get assignment based on id
+ */
+const get = (req, res) => {
+  const { userId, query: { moduleUUID, assignmentId } } = req;
+
+  AssignmentModel.findOne({ userId, moduleUUID })
+    .then((assignment) => {
+      // handle save data not found
+      if (!assignment) {
+        return res.status(NOT_FOUND).send(
+          formatResponse('No save data found.', true, NOT_FOUND)
+        );
+      }
+
+      const { saveData } = assignment;
+      const mappedAssignment = Array.isArray(assignmentId)
+        ? assignmentId.reduce((prev, id) => ({ ...prev, [id]: saveData.get(id) }), {})
+        : { [assignmentId]: saveData.get(assignmentId) };
+
+      return res.status(OK).send(
+        formatResponse('Successfully retrieve sava data', true, undefined, { assignment: mappedAssignment })
+      );
+    })
+    .catch((err) => {
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * save
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling save progress data
+ */
+const save = (req, res) => {
+  const {
+    userId, body: {
+      moduleId, moduleUUID, currentProgress, totalProgress, saveData
+    }
+  } = req;
+  const newSave = {
+    moduleUUID,
+    currentProgress,
+    totalProgress,
+    saveData,
+    progress: currentProgress !== totalProgress ? IN_PROGRESS : FINISHED
+  };
+
+  if (currentProgress === totalProgress) {
+    const [moduleCode, moduleNumber] = moduleUUID.split(MODULE_SEPARATOR);
+
+    const updatedModule = { [`modules.${moduleCode}.${moduleNumber}`]: FINISHED };
+
+    const updatedData = moduleCode === INTERVENTION_MODULE ? { ...updatedModule, [`modules.${ASSIGNMENT_MODULE}.${moduleNumber}`]: UNLOCKED } : updatedModule;
+
+    UserController.updateUserData(userId, updatedData)
+      .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
+  }
+
+  AssignmentModel.findOneAndUpdate({ userId, moduleId }, newSave, { upsert: true, new: true })
+    .then((assignment) => res.status(CREATED).send(
+      formatResponse('Successfully save assignment', true, undefined, {
+        currentProgress: assignment.currentProgress,
+        totalProgress: assignment.totalProgress,
+        saveData: assignment.saveData,
+        progress: assignment.progress,
+        feedbackData: assignment.feedbackData
+      })
+    ))
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
+};
+
+/**
+ * feedback
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling save feedback
+ */
+const feedback = (req, res) => {
+  const {
+    userId, moduleId, feedbackData
+  } = req.body;
+
+  AssignmentModel.findOneAndUpdate({ userId, moduleId }, { feedbackData }, { new: true })
+    .then((assignment) => res.status(CREATED).send(
+      formatResponse('Successfully save feedback', true, undefined, {
+        currentProgress: assignment.currentProgress,
+        totalProgress: assignment.totalProgress,
+        saveData: assignment.saveData,
+        progress: assignment.progress,
+        feedbackData: assignment.feedbackData
+      })
+    ))
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false)));
+};
+
+/**
+ * load
+ *
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to handling load progress data
+ */
+const load = (req, res) => {
+  const { userId, body: { moduleId } } = req;
+
+  AssignmentModel.findOne({ userId, moduleId })
+    .then((assignment) => {
+      // handle save data not found
+      if (!assignment) {
+        return res.status(NOT_FOUND).send(
+          formatResponse('No save data found.', true, NOT_FOUND)
+        );
+      }
+
+      const {
+        currentProgress, totalProgress, saveData, progress
+      } = assignment;
+
+      return res.status(OK).send(
+        formatResponse('Successfully retrieve sava data', true, undefined, {
+          currentProgress, totalProgress, saveData, progress
+        })
+      );
+    })
+    .catch((err) => {
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * getSaveData
+ *
+ * @param {string} userId - user Id
+ * @param {string} moduleId - module Id
+ * @returns get save data for spesific user and module
+ */
+const getSaveData = (userId, moduleId) => AssignmentModel
+  .findOne({ userId, moduleId }).exec();
+
+export default {
+  get,
+  save,
+  feedback,
+  load,
+  getSaveData
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#validate">validate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Jul 19 2024 16:49:41 GMT+0700 (Western Indonesia Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
