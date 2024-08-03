@@ -15,12 +15,15 @@ export default {
   PSYCHOLOGIST: 'psychologist',
   USER_ROLE: ['admin', 'counselor', 'user', 'psychologist'],
   COUNSELOR_ROLE_ONLY: ['admin', 'counselor'],
- PSYCHOLOGIST_ROLE_ONLY: ['admin', 'psychologist'],
+  PSYCHOLOGIST_ROLE_ONLY: ['admin', 'psychologist'],
   ADMIN_ROLE_ONLY: ['admin'],
   USER_STATUS: ['active', 'inactive', 'pending'],
   ACTIVE: 'active',
   INACTIVE: 'inactive',
   PENDING: 'pending',
+  INVITATION_STATUS:['sent', 'pending','registered'],
+  SENT: 'sent',
+  REGISTERED: 'registered',
 
   // auth related
   cookieOptions: (signOut) => ({
@@ -28,7 +31,7 @@ export default {
     httpOnly: true,
     // CANDRA : NEED TO RUN ON LOCAL , IT SHOULD BE STRICT
     secure: true,
-    sameSite: 'None'
+    sameSite: 'None',
   }),
 
   // modules
@@ -40,5 +43,5 @@ export default {
   ASSIGNMENT_MODULE: 'MA',
   INTRO_MODULE: 0,
   FIRST_MODULE: 1,
-  MODULE_SEPARATOR: '_'
+  MODULE_SEPARATOR: '_',
 };
