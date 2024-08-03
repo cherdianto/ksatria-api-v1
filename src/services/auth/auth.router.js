@@ -1,6 +1,7 @@
+/* eslint-disable */
+
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-
 import constants from '../../constants';
 import { formatResponse } from '../../util';
 import { validate, authenticate } from '../../middlewares';
@@ -36,5 +37,27 @@ router
 router
   .route('/ping')
   .get(authenticate.auth(constants.USER_ROLE), (req, res) => res.status(StatusCodes.OK).send(formatResponse('pong, authorized.', true)));
+
+/**
+ * routes for generate reset password link
+ */
+router
+  .route('/reset-password')
+  .post(validate(AuthValidation.generateResetPasswordLink), AuthController.generateResetPasswordLink);
+
+/**
+ * routes for validate reset password link
+ */
+router
+  .route('/validate-reset-password')
+  .get(validate(AuthValidation.validateResetPasswordLink), AuthController.validateResetPasswordLink);
+
+
+  /**
+ * routes for change password with token
+ */
+router
+.route('/change-password-with-token')
+.post(validate(AuthValidation.changePasswordWithToken), AuthController.changePasswordWithToken);
 
 export default router;

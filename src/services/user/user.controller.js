@@ -49,8 +49,8 @@ const get = (isCounselor) => (req, res) => {
  * @returns controller to register new user
  */
 const create = (req, res) => {
-  const { username, password, fullname, roles } = req.body;
-  const newUser = new UserModel({ username, password, fullname, roles });
+  const { username, password, fullname, semester, whatsapp, faculty } = req.body;
+  const newUser = new UserModel({ username, email, password, fullname, roles: USER, status: ACTIVE,  });
 
   newUser.save()
     .then(() => {

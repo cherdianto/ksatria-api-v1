@@ -12,9 +12,15 @@ export default {
   USER: 'user',
   COUNSELOR: 'counselor',
   ADMIN: 'admin',
-  USER_ROLE: ['admin', 'counselor', 'user'],
+  PSYCHOLOGIST: 'psychologist',
+  USER_ROLE: ['admin', 'counselor', 'user', 'psychologist'],
   COUNSELOR_ROLE_ONLY: ['admin', 'counselor'],
+ PSYCHOLOGIST_ROLE_ONLY: ['admin', 'psychologist'],
   ADMIN_ROLE_ONLY: ['admin'],
+  USER_STATUS: ['active', 'inactive', 'pending'],
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  PENDING: 'pending',
 
   // auth related
   cookieOptions: (signOut) => ({

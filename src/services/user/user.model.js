@@ -7,7 +7,7 @@ import config from '../../config';
 import constants from '../../constants';
 
 const {
-  USER, USER_ROLE, LOCKED, UNLOCKED
+  USER, USER_ROLE, USER_STATUS, ACTIVE, LOCKED, UNLOCKED
 } = constants;
 
 /**
@@ -25,14 +25,36 @@ const UserSchema = new mongoose.Schema({
     required: true,
     max: 100
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  whatsapp: {
+    type: String,
+    unique: true,
+  },
   password: {
     type: String,
     required: true
   },
+  semester: {
+    type: Number,
+    required: true
+  },
+  faculty: {
+    type: String,
+  },
+  personalization: Object,
   roles: {
     type: String,
     enum: USER_ROLE,
     default: USER
+  },
+  roles: {
+    type: String,
+    enum: USER_STATUS,
+    default: ACTIVE
   },
   counselorId: {
     type: mongoose.ObjectId
@@ -59,7 +81,8 @@ const UserSchema = new mongoose.Schema({
       }
     }
   }
-}, { timestamps: true });
+}, { timestamps: true },
+{ versionKey: false });
 
 /**
  * user model schema pre save configuration

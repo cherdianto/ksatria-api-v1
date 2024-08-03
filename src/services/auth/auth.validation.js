@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Joi from 'joi';
 
 /**
@@ -16,6 +18,29 @@ const login = {
   })
 };
 
+const generateResetPasswordLink = {
+  body: Joi.object().keys({
+    email: Joi.string().email().required()
+  })
+};
+
+const validateResetPasswordLink = {
+  body: Joi.object().keys({
+    token: Joi.string()
+    .required()
+  })
+};
+
+const changePasswordWithToken = {
+  body: Joi.object().keys({
+    token: Joi.string().required(),
+    newPassword: Joi.string().required()
+  })
+};
+
 export default {
-  login
+  login,
+  generateResetPasswordLink,
+  validateResetPasswordLink,
+  changePasswordWithToken
 };
