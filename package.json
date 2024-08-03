@@ -37,6 +37,7 @@
     "loglevel-colored-level-prefix": "^1.0.0",
     "mongoose": "^8.0.2",
     "morgan-body": "^2.6.9",
+    "nodemailer": "^6.9.14",
     "nodemon": "^3.0.3"
   },
   "devDependencies": {

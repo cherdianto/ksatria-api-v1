@@ -7,6 +7,7 @@ import { UserModel } from '../user';
 import TokenModel from '../token/token.model';
 import { formatResponse, jwt } from '../../util';
 import constants from '../../constants';
+import tokenGenerator from '../../util/tokenGenerator';
 
 const {
   OK, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED
@@ -135,7 +136,7 @@ const generateResetPasswordLink = (req, res) => {
 
       await TokenModel.create({
         email,
-        token: _generateToken(),
+        token: tokenGenerator(),
         expiryAt
       });
 

@@ -1906,6 +1906,11 @@
   dependencies:
     "whatwg-url" "^5.0.0"
 
+"nodemailer@^6.9.14":
+  "integrity" "sha512-Dobp/ebDKBvz91sbtRKhcznLThrKxKt97GI2FAlAyy+fk19j73Uz3sBXolVtmcXjaorivqsbbbjDY+Jkt4/bQA=="
+  "resolved" "https://registry.npmjs.org/nodemailer/-/nodemailer-6.9.14.tgz"
+  "version" "6.9.14"
+
 "nodemon@^3.0.3":
   "integrity" "sha512-7jH/NXbFPxVaMwmBCC2B9F/V6X1VkEdNgx3iu9jji8WxWcvhMWkmhNWhI5077zknOnZnBzba9hZP6bCPJLSReQ=="
   "resolved" "https://registry.npmjs.org/nodemon/-/nodemon-3.0.3.tgz"
