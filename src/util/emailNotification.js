@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 import fs from 'fs';
 
 // Load environment variables from .env file
-dotenv.config();
+// dotenv.config();
 
 // Load email templates
 const invitationTemplate = fs.readFileSync('src/templates/email_templates/invitation_template.html', 'utf-8');
@@ -17,15 +17,15 @@ export const sendEmail = async ({recipientEmail, subject, templateType, dynamicD
 
   // Determine which template to use based on templateType
   switch (templateType) {
-    case 'invitation':
+    case 'invitation_template':
       htmlTemplate = invitationTemplate.replace('{{registrationLink}}', dynamicData.registrationLink);
       emailSubject = 'Invitation to Register';
       break;
-    case 'reset_password':
+    case 'reset_password_template':
       htmlTemplate = resetPasswordTemplate.replace('{{resetPasswordLink}}', dynamicData.resetPasswordLink);
       emailSubject = 'Reset Your Password';
       break;
-    case 'notification':
+    case 'notification_template':
       htmlTemplate = notificationTemplate.replace('{{notificationBody}}', dynamicData.notificationBody);
       emailSubject = subject || 'Notification';
       break;

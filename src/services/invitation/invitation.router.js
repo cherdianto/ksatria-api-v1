@@ -28,4 +28,13 @@ router
     invitationController.invite
   );
 
+/**
+ * routes for register new user from 
+ */
+router
+  .route('/register')
+  .post(
+    invitationController.registerUser
+  );
+
 export default router;

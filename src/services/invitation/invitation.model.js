@@ -26,7 +26,7 @@ const InvitationSchema = new mongoose.Schema(
     },
     counselorId: {
       type: mongoose.Types.ObjectId,
-      required: true,
+      // required: true,
       ref: 'User',
     },
     role: {
