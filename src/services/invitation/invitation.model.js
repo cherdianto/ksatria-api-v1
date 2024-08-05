@@ -17,7 +17,7 @@ const InvitationSchema = new mongoose.Schema(
     },
     token: {
       type: String,
-      required: true,
+      // required: true,
     },
     status: {
       type: String,

@@ -14,7 +14,7 @@ const router = Router();
 router
   .route('/bulk-invite')
   .post(
-    authenticate.auth(ADMIN_ROLE_ONLY), 
+    // authenticate.auth(ADMIN_ROLE_ONLY), 
     invitationController.bulkCreate
   );
 
@@ -35,6 +35,24 @@ router
   .route('/register')
   .post(
     invitationController.registerUser
+  );
+
+  /**
+ * routes for token invitation verification 
+ */
+router
+.route('/verify')
+.post(
+  invitationController.verify
+);
+
+  /**
+ * routes for get all invitations (paginated)
+ */
+  router
+  .route('/get-all')
+  .get(
+    invitationController.getAllInvitations
   );
 
 export default router;
