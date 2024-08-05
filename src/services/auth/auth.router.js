@@ -49,15 +49,15 @@ router
  * routes for validate reset password link
  */
 router
-  .route('/validate-reset-password')
-  .get(validate(AuthValidation.validateResetPasswordLink), AuthController.validateResetPasswordLink);
+  .route('/validate-reset')
+  .post(validate(AuthValidation.validateResetPasswordLink), AuthController.validateResetPasswordLink);
 
 
   /**
  * routes for change password with token
  */
 router
-.route('/change-password-with-token')
+.route('/change-password')
 .post(validate(AuthValidation.changePasswordWithToken), AuthController.changePasswordWithToken);
 
 export default router;

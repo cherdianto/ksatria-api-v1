@@ -250,42 +250,39 @@ const verify = async (req, res) => {
  * @returns controller to get paginated invitation data
  */
 const getAllInvitations = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10, filter = {} } = req.query;
 
-  // Validate and parse page and limit
-  const pageNumber = parseInt(page, 10);
-  const pageSize = parseInt(limit, 10);
-
-  if (isNaN(pageNumber) || pageNumber < 1) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send(formatResponse('Invalid page number', false));
-  }
-
-  if (isNaN(pageSize) || pageSize < 1) {
-    return res
-      .status(INTERNAL_SERVER_ERROR)
-      .send(formatResponse('Invalid limit', false));
-  }
-
+  const skip = (page - 1) * limit;
+  const limitNum = parseInt(limit, 10);
+  
   try {
-    const totalInvitations = await InvitationModel.countDocuments();
-    const invitations = await InvitationModel.find()
-      .skip((pageNumber - 1) * pageSize)
-      .limit(pageSize)
-      .sort({ createdAt: -1 }); // Optional: sort by creation date in descending order
+    const filterObject = {};
+    
+    // Apply filters if provided
+    if (filter.email) {
+      filterObject.email = { $regex: new RegExp(filter.email, 'i') };
+    }
+    if (filter.status) {
+      filterObject.status = filter.status;
+    }
+    if (filter.role) {
+      filterObject.role = filter.role;
+    }
 
-    res.status(OK).send(
-      formatResponse('Successfully retrieved invitations', true, undefined, {
-        total: totalInvitations,
-        page: pageNumber,
-        limit: pageSize,
-        invitations,
-      })
-    );
-  } catch (err) {
-    logger.error('Error retrieving invitations:', err);
-    res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+    const total = await InvitationModel.countDocuments(filterObject);
+    const invitations = await InvitationModel.find(filterObject)
+      .skip(skip)
+      .limit(limitNum)
+      .exec();
+
+    res.status(OK).send(formatResponse('Successfully retrieved invitations', true, {
+      total,
+      page: parseInt(page, 10),
+      limit: limitNum,
+      invitations
+    }));
+  } catch (error) {
+    res.status(INTERNAL_SERVER_ERROR).send(formatResponse(error.message, false));
   }
 };
 

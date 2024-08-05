@@ -8,6 +8,7 @@ import TokenModel from '../token/token.model';
 import { formatResponse, jwt } from '../../util';
 import constants from '../../constants';
 import tokenGenerator from '../../util/tokenGenerator';
+import { sendEmail } from '../../util/emailNotification'
 
 const {
   OK, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED
@@ -100,7 +101,7 @@ const logout = (req, res) => res
  * @returns controller to handling reset password link
  */
 const validateResetPasswordLink = (req, res) => {
-  const { token } = req.query;
+  const { token } = req.body;
 
   TokenModel.findOne({ token })
     .then((dataToken) => {
@@ -111,7 +112,7 @@ const validateResetPasswordLink = (req, res) => {
       }
 
       return res.status(OK).send(
-        formatResponse('Successfully confirm token validity', true, undefined, { dataToken })
+        formatResponse('Token is valid', true, undefined, { email: dataToken.email })
       );
     })
     .catch((err) => {
@@ -132,23 +133,27 @@ const generateResetPasswordLink = (req, res) => {
   UserModel.findOne({ email })
     .then(async () => {
       const expiryAt = new Date();
+      const token = tokenGenerator()
+
+      // set the expiry date time
       expiryAt.setMinutes(expiryAt.getMinutes() + 15);
+
 
       await TokenModel.create({
         email,
-        token: tokenGenerator(),
+        token,
         expiryAt
       });
 
       // SEND RESET LINK TO USER EMAIL
-      // const resetPasswordLink = `${API_URL}/v1/auth/rst?token=${newToken.token}`;
-      // // Replace with actual sending logic
-      // await sendEmail({
-      //   recipientEmail: email,
-      //   subject: 'Reset Password Ksatria Project',
-      //   templateType: 'reset_password',
-      //   dynamicData: { resetPasswordLink },
-      // });
+      const resetPasswordLink = `${process.env.CLIENT_URL}/auth/rst?token=${token}`;
+      // Replace with actual sending logic
+      await sendEmail({
+        recipientEmail: email,
+        subject: 'Reset Password Ksatria Project',
+        templateType: 'reset_password_template',
+        dynamicData: { resetPasswordLink },
+      });
 
       res.status(OK).send(
         formatResponse('Successfully generate reset password link', true, undefined)
