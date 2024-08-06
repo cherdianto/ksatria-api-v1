@@ -1,8 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
-
 import constants from '../../constants';
 import { formatResponse } from '../../util';
-
 import UserModel from './user.model';
 
 const {
@@ -17,7 +15,63 @@ const {
   MODULE_SEPARATOR
 } = constants;
 
-// Getting all user
+// get all user data based on role
+// PAGINATION AND FILTER
+const adminGetAll = (req, res) => {
+  const userId = req.userId;
+  const { page = 1, pageSize = 10, filters = {} } = req.query;
+
+  const query = {};
+  const projection = '-password -updatedAt -createdAt';
+
+  // Apply filters if any
+  if (filters.email) {
+    query.email = filters.email;
+  }
+  if (filters.username) {
+    query.username = filters.username;
+  }
+  if (filters.role) {
+    query.role = filters.role;
+  }
+  if (filters.semester) {
+    query.semester = filters.semester;
+  }
+  if (filters.faculty) {
+    query.faculty = filters.faculty;
+  }
+  if (filters.status) {
+    query.status = filters.status;
+  }
+  if (filters.whatsapp) {
+    query.whatsapp = filters.whatsapp;
+  }
+
+  UserModel.countDocuments(query)
+    .then(total => {
+      UserModel.find(query)
+        .select(projection)
+        .skip((page - 1) * pageSize)
+        .limit(Number(pageSize))
+        .then(userData => {
+          res.status(OK).send(
+            formatResponse('Successfully retrieved user data', true, undefined, {
+              data: userData,
+              total
+            })
+          );
+        })
+        .catch(err => {
+          res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+        });
+    })
+    .catch(err => {
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+    });
+}
+
+
+// counselor get all students
 const get = (isCounselor) => (req, res) => {
   const filter = isCounselor ? { counselorId: req.userId } : (req.body || {});
   const options = isCounselor ? '-password -__v -createdAt -updatedAt -counselorId -roles' : '-password -__v';

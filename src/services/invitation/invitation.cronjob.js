@@ -16,7 +16,7 @@ const _sendInvitation = async (email, role, counselorId) => {
   const token = tokenGenerator();
 
   // sending invitation mail
-  const registrationLink = `${process.env.CLIENT_URL}/invitation?token=${token}`;
+  const registrationLink = `${process.env.CLIENT_URL}/register?token=${token}`;
 
   // Replace with actual sending logic
   await sendEmail({
