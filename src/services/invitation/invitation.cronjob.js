@@ -52,13 +52,11 @@ export const startCronJob = () => {
 
       // if task available, send the invitation
       const { email, role, counselorId } = remainingTask;
-      logger.info(email);
       const token = await _sendInvitation(email, role, counselorId);
-      // logger.info(token);
+
       remainingTask.status = SENT;
       remainingTask.token = token;
       await remainingTask.save();
-      // logger.info(remainingTask);
     },
     {
       scheduled: true,

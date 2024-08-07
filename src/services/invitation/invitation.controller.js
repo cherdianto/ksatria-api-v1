@@ -24,8 +24,10 @@ const bulkCreate = async (req, res) => {
   try {
     for (const data of bulkData) {
       // Find the document with the specified email
-      const existingInvitation = await InvitationModel.findOne({ email: data.email });
-    
+      const existingInvitation = await InvitationModel.findOne({
+        email: data.email,
+      });
+
       if (existingInvitation) {
         // If a document with the specified email exists
         if (existingInvitation.status === REGISTERED) {
@@ -54,7 +56,7 @@ const bulkCreate = async (req, res) => {
         });
       }
     }
-    
+
     startCronJob();
 
     res
@@ -73,39 +75,74 @@ const bulkCreate = async (req, res) => {
  */
 const invite = async (req, res) => {
   const { email, counselorId, role } = req.body;
-
   // generate a token
   const token = tokenGenerator();
-
   // sending invitation mail
-  const registrationLink = `http://localhost:3001/invitation?token=${token}`;
+  const registrationLink = `http://localhost:3001/register?token=${token}`;
 
-  // Replace with actual sending logic
-  await sendEmail({
-    recipientEmail: email,
-    subject: 'Invitation to join Ksatria Project',
-    templateType: 'invitation_template',
-    dynamicData: { registrationLink },
-  });
-
-  const newInvitation = new InvitationModel({
+  await InvitationModel.findOne({
     email,
-    // counselorId,
-    role,
-    token,
-  });
+  })
+    .then(async (existingInvitation) => {
+      if (existingInvitation) {
+        if (existingInvitation.status === REGISTERED) {
+          // Skip the update if the status is 'REGISTERED'
+          return res
+            .status(OK)
+            .send(
+              formatResponse('This email alredy registered in our sistem', true)
+            );
+        } else {
+          await InvitationModel.updateOne(
+            { email: email },
+            {
+              $set: {
+                role: role,
+                counselorId: counselorId,
+                status: PENDING,
+                token,
+              },
+            }
+          );
 
-  newInvitation
-    .save()
-    .then(() => {
-      res
-        .status(CREATED)
-        .send(formatResponse('Successfully send an invitation', true));
+          // Replace with actual sending logic
+          await sendEmail({
+            recipientEmail: email,
+            subject: 'Invitation to join Ksatria Project',
+            templateType: 'invitation_template',
+            dynamicData: { registrationLink },
+          });
+
+          return res
+            .status(OK)
+            .send(formatResponse('Successfully sent the invitation', true));
+        }
+      } else {
+        await InvitationModel.create({
+          email: email,
+          role: role,
+          counselorId: counselorId,
+          status: PENDING,
+          token,
+        });
+
+        // Replace with actual sending logic
+        await sendEmail({
+          recipientEmail: email,
+          subject: 'Invitation to join Ksatria Project',
+          templateType: 'invitation_template',
+          dynamicData: { registrationLink },
+        });
+
+        return res
+          .status(OK)
+          .send(formatResponse('Successfully sent the invitation', true));
+      }
     })
-    .catch((err) => {
-      res
+    .catch(async (err) => {
+      return res
         .status(INTERNAL_SERVER_ERROR)
-        .send(formatResponse(err.message, false));
+        .send(formatResponse(err.message, true));
     });
 };
 
@@ -118,15 +155,15 @@ const invite = async (req, res) => {
 const registerUser = async (req, res) => {
   const isTokenExist = await InvitationModel.findOne({ token: req.body.token });
 
-  logger.info(isTokenExist);
-
   if (!isTokenExist) {
     return res
       .status(NOT_FOUND)
       .send(formatResponse('Token invalid or has been used', true));
   }
 
-  const { username, password, fullname, semester, whatsapp, faculty, email } =
+  const email = isTokenExist.email;
+
+  const { username, password, fullname, semester, whatsapp, faculty } =
     req.body;
 
   if (await checkDuplicateField('email', email)) {
@@ -165,9 +202,7 @@ const registerUser = async (req, res) => {
         )
       );
   }
-
-  logger.info(isTokenExist);
-
+  
   const newUser = new UserModel({
     email,
     semester,
@@ -226,14 +261,18 @@ const verify = async (req, res) => {
   }
 
   if (isTokenExist.status === REGISTERED) {
-
     // remove the token
     isTokenExist.token = null;
     await isTokenExist.save();
 
     return res
       .status(INTERNAL_SERVER_ERROR)
-      .send(formatResponse('You have been registered. Please login or contact the administrator', true));
+      .send(
+        formatResponse(
+          'You have been registered. Please login or contact the administrator',
+          true
+        )
+      );
   }
 
   res.status(OK).send(
@@ -254,10 +293,10 @@ const getAllInvitations = async (req, res) => {
 
   const skip = (page - 1) * limit;
   const limitNum = parseInt(limit, 10);
-  
+
   try {
     const filterObject = {};
-    
+
     // Apply filters if provided
     if (filter.email) {
       filterObject.email = { $regex: new RegExp(filter.email, 'i') };
@@ -275,14 +314,18 @@ const getAllInvitations = async (req, res) => {
       .limit(limitNum)
       .exec();
 
-    res.status(OK).send(formatResponse('Successfully retrieved invitations', true, {
-      total,
-      page: parseInt(page, 10),
-      limit: limitNum,
-      invitations
-    }));
+    res.status(OK).send(
+      formatResponse('Successfully retrieved invitations', true, {
+        total,
+        page: parseInt(page, 10),
+        limit: limitNum,
+        invitations,
+      })
+    );
   } catch (error) {
-    res.status(INTERNAL_SERVER_ERROR).send(formatResponse(error.message, false));
+    res
+      .status(INTERNAL_SERVER_ERROR)
+      .send(formatResponse(error.message, false));
   }
 };
 

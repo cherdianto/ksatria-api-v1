@@ -27,37 +27,56 @@ router
 /**
  * routes for ping logged in user
  */
-router
-  .route('/refresh')
-  .post(authenticate.refresh, AuthController.refresh);
+router.route('/refresh').post(authenticate.refresh, AuthController.refresh);
 
 /**
  * routes for ping logged in user
  */
 router
   .route('/ping')
-  .get(authenticate.auth(constants.USER_ROLE), (req, res) => res.status(StatusCodes.OK).send(formatResponse('pong, authorized.', true)));
+  .get(authenticate.auth(constants.USER_ROLE), (req, res) =>
+    res.status(StatusCodes.OK).send(formatResponse('pong, authorized.', true))
+  );
 
 /**
  * routes for generate reset password link
  */
 router
   .route('/reset-password')
-  .post(validate(AuthValidation.generateResetPasswordLink), AuthController.generateResetPasswordLink);
+  .post(
+    validate(AuthValidation.generateResetPasswordLink),
+    AuthController.generateResetPasswordLink
+  );
 
 /**
  * routes for validate reset password link
  */
 router
   .route('/validate-reset')
-  .post(validate(AuthValidation.validateResetPasswordLink), AuthController.validateResetPasswordLink);
+  .post(
+    validate(AuthValidation.validateResetPasswordLink),
+    AuthController.validateResetPasswordLink
+  );
 
+/**
+ * routes for change password
+ */
+router
+  .route('/change-user-password')
+  .post(
+    authenticate.auth(constants.USER_ROLE),
+    // validate(AuthValidation.changeUserPassword),
+    AuthController.changeUserPassword
+  );
 
-  /**
+/**
  * routes for change password with token
  */
 router
-.route('/change-password')
-.post(validate(AuthValidation.changePasswordWithToken), AuthController.changePasswordWithToken);
+  .route('/change-password')
+  .post(
+    validate(AuthValidation.changePasswordWithToken),
+    AuthController.changePasswordWithToken
+  );
 
 export default router;

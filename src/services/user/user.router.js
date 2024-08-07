@@ -9,26 +9,58 @@ const { ADMIN_ROLE_ONLY, COUNSELOR_ROLE_ONLY, USER_ROLE } = constants;
 
 const router = Router();
 
+
+/**
+ * routes for user get his own data
+ */
+router
+.route('/')
+.get(
+  // validate(UserValidation.get),
+  authenticate.auth(USER_ROLE),
+  UserController.getUserData
+);
+
+/**
+ * routes for admin to get all user
+ */
+router.route('/get-all').get(
+  authenticate.auth(ADMIN_ROLE_ONLY),
+  UserController.adminGetAll
+);
+
 /**
  * routes for get all user
  */
 router
-  .route('/')
+  .route('/students')
   .get(
     validate(UserValidation.get),
     authenticate.auth(ADMIN_ROLE_ONLY),
-    UserController.get(false)
+    UserController.getStudents(false)
   );
 
 /**
- * routes for get all student from counselor
+ * routes for update user data by user
  */
 router
-  .route('/students')
-  .get(
-    authenticate.auth(COUNSELOR_ROLE_ONLY),
-    UserController.get(true)
-  );
+.route('/update')
+.post(
+  // validate(UserValidation.get),
+  authenticate.auth(USER_ROLE),
+  UserController.updateUserData
+);
+
+/**
+ * routes for update user data by admin
+ */
+router
+.route('/admin-update')
+.post(
+  // validate(UserValidation.get),
+  authenticate.auth(ADMIN_ROLE_ONLY),
+  UserController.adminUpdateUserData
+);
 
 /**
  * routes for ping logged in user
@@ -40,24 +72,19 @@ router
 /**
  * routes for register new
  */
-router
-  .route('/register')
-  .post(
-    // validate(UserValidation.register),
-    // CANDRA: temporarely disabled for stagin deployment
-    // authenticate.auth(ADMIN_ROLE_ONLY), 
-    UserController.create
-  );
+router.route('/register').post(
+  // validate(UserValidation.register),
+  // CANDRA: temporarely disabled for stagin deployment
+  // authenticate.auth(ADMIN_ROLE_ONLY),
+  UserController.create
+);
 
 /**
  * routes for update intro
  */
 router
   .route('/updateIntro')
-  .post(
-    authenticate.auth(USER_ROLE),
-    UserController.updateIntro
-  );
+  .post(authenticate.auth(USER_ROLE), UserController.updateIntro);
 
 /**
  * routes for update user modules
