@@ -9,6 +9,15 @@ const ModuleSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  title: {
+    type: String,
+    required: false,
+    unique: true
+  },
+  description: {
+    type: String,
+    required: false
+  },
   moduleContent: {
     type: Object,
     required: true

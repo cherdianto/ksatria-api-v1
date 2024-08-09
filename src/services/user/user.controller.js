@@ -221,7 +221,7 @@ const create = (req, res) => {
  * @param {Object} res - express res
  * @returns controller to update user details
  */
-const updateUserData = (req, res) => {
+const updateUserProfile = (req, res) => {
   const { username, fullname, semester, whatsapp, faculty, email } = req.body;
   const userId = req.userId;
 
@@ -232,7 +232,6 @@ const updateUserData = (req, res) => {
           .status(NOT_FOUND)
           .send(formatResponse(`User not found`, false));
       }
-
 
       if (user.email !== email) {
         const isDuplicateEmail = await UserModel.findOne({ email });
@@ -259,11 +258,9 @@ const updateUserData = (req, res) => {
       if (user.fullname !== fullname) {
         const isDuplicateFullname = await UserModel.findOne({ fullname });
         if (isDuplicateFullname)
-          throw new Error(
-            'Name is taken, please use another name'
-          );
+          throw new Error('Name is taken, please use another name');
       }
-      
+
       // Update user fields
       user.username = username || user.username;
       user.email = email || user.email;
@@ -271,8 +268,6 @@ const updateUserData = (req, res) => {
       user.semester = semester || user.semester;
       user.whatsapp = whatsapp || user.whatsapp;
       user.faculty = faculty || user.faculty;
-
-      
 
       return user.save();
     })
@@ -388,6 +383,17 @@ const getModules = (req, res) => {
 // const updateUserData = (userId, newData) =>
 //   UserModel.findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
 
+
+/**
+ * updateUserData
+ *
+ * @param {string} userId - user Id
+ * @param {Object} newData - new user data
+ * @returns controller to handling update some user data
+ */
+const updateUserData = (userId, newData) => UserModel
+  .findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
+
 /**
  * updateIntro
  *
@@ -405,9 +411,12 @@ const updateIntro = (req, res) =>
         .status(OK)
         .send(formatResponse('Successfully update tutorial status', true))
     )
-    .catch((err) =>
-      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false))
-    );
+    .catch((err) => {
+      console.log(err);
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
 
 /**
  * updateModules
@@ -461,7 +470,7 @@ export default {
   updateCounselor,
   updateUserData,
   adminGetAll,
-  updateUserData,
+  updateUserProfile,
   getUserData,
   adminUpdateUserData,
 };

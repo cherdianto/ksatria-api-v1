@@ -23,6 +23,8 @@ const bulkCreate = async (req, res) => {
 
   try {
     for (const data of bulkData) {
+      // find the doccument with the specified email
+      const isRegistered = await UserModel.findOne({email: data.email})
       // Find the document with the specified email
       const existingInvitation = await InvitationModel.findOne({
         email: data.email,
@@ -46,6 +48,13 @@ const bulkCreate = async (req, res) => {
             }
           );
         }
+      } else if (isRegistered && !existingInvitation) {
+        await InvitationModel.create({
+          email: data.email,
+          role: data.role,
+          counselorId: data.counselorId,
+          status: REGISTERED,
+        });
       } else {
         // Insert a new document if no document with the specified email exists
         await InvitationModel.create({
@@ -75,6 +84,16 @@ const bulkCreate = async (req, res) => {
  */
 const invite = async (req, res) => {
   const { email, counselorId, role } = req.body;
+
+  const isRegistered = await UserModel.findOne({email})
+  if(isRegistered){
+    return res
+            .status(INTERNAL_SERVER_ERROR)
+            .send(
+              formatResponse('This email is already registered in our sistem', true)
+            ); 
+  }
+
   // generate a token
   const token = tokenGenerator();
   // sending invitation mail
@@ -90,7 +109,7 @@ const invite = async (req, res) => {
           return res
             .status(OK)
             .send(
-              formatResponse('This email alredy registered in our sistem', true)
+              formatResponse('This email is already registered in our sistem', true)
             );
         } else {
           await InvitationModel.updateOne(

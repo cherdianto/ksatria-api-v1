@@ -44,11 +44,11 @@ router
  * routes for update user data by user
  */
 router
-.route('/update')
+.route('/user-update')
 .post(
   // validate(UserValidation.get),
   authenticate.auth(USER_ROLE),
-  UserController.updateUserData
+  UserController.updateUserProfile
 );
 
 /**
