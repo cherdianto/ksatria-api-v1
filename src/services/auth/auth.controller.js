@@ -140,48 +140,57 @@ const validateResetPasswordLink = (req, res) => {
  * @param {Object} res - express res
  * @returns controller to handling generation of reset link
  */
-const generateResetPasswordLink = (req, res) => {
+const generateResetPasswordLink = async (req, res) => {
   const { email } = req.body;
 
-  UserModel.findOne({ email })
-    .then(async () => {
-      const expiryAt = new Date();
-      const token = tokenGenerator();
+  const user = await UserModel.findOne({ email });
 
-      // set the expiry date time
-      expiryAt.setMinutes(expiryAt.getMinutes() + 15);
+  if (!user) {
+    res
+      .status(NOT_FOUND)
+      .send(
+        formatResponse(
+          'We cannot identify your email. Please contact our administrator.',
+          false
+        )
+      );
+  }
 
-      await TokenModel.create({
-        email,
-        token,
-        expiryAt,
-      });
+  try {
+    const expiryAt = new Date();
+    const token = tokenGenerator();
 
-      // SEND RESET LINK TO USER EMAIL
-      const resetPasswordLink = `${process.env.CLIENT_URL}/auth/rst?token=${token}`;
-      // Replace with actual sending logic
-      await sendEmail({
-        recipientEmail: email,
-        subject: 'Reset Password Ksatria Project',
-        templateType: 'reset_password_template',
-        dynamicData: { resetPasswordLink },
-      });
+    // set the expiry date time
+    expiryAt.setMinutes(expiryAt.getMinutes() + 15);
 
-      res
-        .status(OK)
-        .send(
-          formatResponse(
-            'Successfully generate reset password link',
-            true,
-            undefined
-          )
-        );
-    })
-    .catch((err) => {
-      res
-        .status(INTERNAL_SERVER_ERROR)
-        .send(formatResponse(err.message, false));
+    await TokenModel.create({
+      email,
+      token,
+      expiryAt,
     });
+
+    // SEND RESET LINK TO USER EMAIL
+    const resetPasswordLink = `${process.env.CLIENT_URL}/auth/rst?token=${token}`;
+    // Replace with actual sending logic
+    await sendEmail({
+      recipientEmail: email,
+      subject: 'Reset Password Ksatria Project',
+      templateType: 'reset_password_template',
+      dynamicData: { resetPasswordLink },
+    });
+
+    res
+      .status(OK)
+      .send(
+        formatResponse(
+          'Successfully generate reset password link',
+          true,
+          undefined
+        )
+      );
+  } catch (error) {
+    res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+  }
 };
 
 /**
@@ -257,11 +266,9 @@ const changeUserPassword = async (req, res) => {
         .send(formatResponse('Invalid credentials', false, UNAUTHORIZED));
     }
 
-    await UserModel.updateOne(
-      { _id: userId },
-      { $set: { password: newPassword } }
-    );
-
+    user.password = newPassword;
+    await user.save();
+    
     await sendEmail({
       recipientEmail: user.email,
       subject: 'Your Password Has Been Changed',

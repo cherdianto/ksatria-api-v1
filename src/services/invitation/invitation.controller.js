@@ -315,7 +315,7 @@ const getAllInvitations = async (req, res) => {
       .exec();
 
     res.status(OK).send(
-      formatResponse('Successfully retrieved invitations', true, {
+      formatResponse('Successfully retrieved invitations', true, undefined, {
         total,
         page: parseInt(page, 10),
         limit: limitNum,
@@ -329,10 +329,46 @@ const getAllInvitations = async (req, res) => {
   }
 };
 
+/**
+ * Delete an invitation
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to delete an invitation
+ */
+const deleteInvitation = async (req, res) => {
+  const { email } = req.params;
+
+  if(!email) {
+    return res
+        .status(NOT_FOUND)
+        .send(formatResponse('Email not found', false));
+  }
+
+  try {
+    // Find and delete the invitation with the specified email
+    const result = await InvitationModel.deleteOne({ email });
+
+    if (result.deletedCount === 0) {
+      return res
+        .status(NOT_FOUND)
+        .send(formatResponse('Invitation not found', false));
+    }
+
+    res
+      .status(OK)
+      .send(formatResponse('Invitation successfully deleted', true));
+  } catch (err) {
+    res
+      .status(INTERNAL_SERVER_ERROR)
+      .send(formatResponse(err.message, false));
+  }
+};
+
 export default {
   bulkCreate,
   invite,
   registerUser,
   verify,
   getAllInvitations,
+  deleteInvitation
 };
