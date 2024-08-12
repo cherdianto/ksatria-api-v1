@@ -32,6 +32,15 @@ router
   );
 
 /**
+ * routes for get all modules
+ */
+router.route('/all').get(
+  // validate(ModuleValidation.getModule),
+  authenticate.auth(USER_ROLE),
+  ModuleController.getAll
+);
+
+/**
  * routes for get spesific student modules
  */
 router

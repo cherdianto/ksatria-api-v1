@@ -9,6 +9,11 @@ const ModuleSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  status: {
+    type: String,
+    enum: ['published', 'draft'],
+    default: 'draft'
+  },
   title: {
     type: String,
     required: false,

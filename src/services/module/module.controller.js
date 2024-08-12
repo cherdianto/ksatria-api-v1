@@ -4,9 +4,7 @@ import ModuleModel from './module.model';
 import { formatResponse } from '../../util';
 import assignmentController from '../assignment/assignment.controller';
 
-const {
-  OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR
-} = StatusCodes;
+const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 
 /**
  * create or update existing module
@@ -18,14 +16,21 @@ const create = (req, res) => {
   const { moduleUUID, moduleContent } = req.body;
   const newModule = { moduleUUID, moduleContent };
 
-  ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, { new: true, upsert: true })
+  ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, {
+    new: true,
+    upsert: true,
+  })
     .then(() => {
-      res.status(CREATED).send(
-        formatResponse(`Successfully register module ${moduleUUID}`, true)
-      );
+      res
+        .status(CREATED)
+        .send(
+          formatResponse(`Successfully register module ${moduleUUID}`, true)
+        );
     })
     .catch((err) => {
-      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
     });
 };
 
@@ -42,19 +47,26 @@ const get = (isAdmin) => (req, res) => {
     .then(async (module) => {
       // handle module not found
       if (!module) {
-        return res.status(NOT_FOUND).send(
-          formatResponse('Module doesn\'t exist', true, NOT_FOUND)
-        );
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Module doesn't exist", true, NOT_FOUND));
       }
 
       const userId = isAdmin ? req.query.userId : req.userId;
-      const _loadSaveData = await assignmentController.getSaveData(userId, module._id);
+      const _loadSaveData = await assignmentController.getSaveData(
+        userId,
+        module._id
+      );
       let mappedSaveData = null;
 
       // attach user save data
       if (_loadSaveData) {
         const {
-          currentProgress, totalProgress, saveData, progress, feedbackData
+          currentProgress,
+          totalProgress,
+          saveData,
+          progress,
+          feedbackData,
         } = _loadSaveData;
 
         mappedSaveData = {
@@ -62,7 +74,7 @@ const get = (isAdmin) => (req, res) => {
           totalProgress,
           progress,
           saveData,
-          feedbackData
+          feedbackData,
         };
       }
 
@@ -71,16 +83,37 @@ const get = (isAdmin) => (req, res) => {
           id: module._id,
           moduleUUID: module.moduleUUID,
           contents: module.moduleContent[language] || {},
-          progress: mappedSaveData || {}
+          progress: mappedSaveData || {},
         })
       );
     })
     .catch((err) => {
-      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
     });
+};
+
+const getAll = async (req, res) => {
+  // get all data if role is admin, get only published if other role
+  const query = req.userId.roles === 'admin' ? {} : { status: 'published' };
+
+  const modules = await ModuleModel.find(query).select(
+    'title description status moduleUUID'
+  );
+  if (!modules) {
+    return res.status(NOT_FOUND).send(formatResponse(err.message, false));
+  }
+
+  res.status(OK).send(
+    formatResponse('Successfully retreive all modules', true, undefined, {
+      modules,
+    })
+  );
 };
 
 export default {
   create,
-  get
+  get,
+  getAll,
 };
