@@ -3,8 +3,9 @@ import { StatusCodes } from 'http-status-codes';
 import ModuleModel from './module.model';
 import { formatResponse } from '../../util';
 import assignmentController from '../assignment/assignment.controller';
+import { UserModel } from '../user';
 
-const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
+const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } = StatusCodes;
 
 /**
  * create or update existing module
@@ -50,9 +51,6 @@ const create = (req, res) => {
  */
 const getDetailModule = (req, res) => {
   const { moduleUUID, language } = req.query;
-
-  console.log(moduleUUID)
-  console.log(language)
   ModuleModel.findOne({ moduleUUID })
     .then(async (module) => {
       // handle module not found
@@ -170,14 +168,28 @@ const get = (isAdmin) => (req, res) => {
     });
 };
 
+
+/**
+ * get all modules
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to get all modules
+ */
 const getAll = async (req, res) => {
+  const userId = req.userId
+  
+  const user = await UserModel.findById(userId)
+  if (!user) {
+    return res.status(UNAUTHORIZED).send(formatResponse(err.message, false));
+  }
+  
   // get all data if role is admin, get only published if other role
-  // const query = req.userId.roles === 'admin' ? {} : { status: 'published' };
-  const query = {};
+  const query = user?.roles === 'admin' ? {} : { status: 'published' };
 
   const modules = await ModuleModel.find(query).select(
     'title description status image moduleUUID'
   );
+
   if (!modules) {
     return res.status(NOT_FOUND).send(formatResponse(err.message, false));
   }
