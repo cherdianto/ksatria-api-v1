@@ -5,7 +5,8 @@ import { formatResponse } from '../../util';
 import assignmentController from '../assignment/assignment.controller';
 import { UserModel } from '../user';
 
-const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } = StatusCodes;
+const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } =
+  StatusCodes;
 
 /**
  * create or update existing module
@@ -42,7 +43,6 @@ const create = (req, res) => {
     });
 };
 
-
 /**
  * get spesicfic module
  * @param {Object} req - express req
@@ -60,39 +60,13 @@ const getDetailModule = (req, res) => {
           .send(formatResponse("Module doesn't exist", true, NOT_FOUND));
       }
 
-      // const userId = isAdmin ? req.query.userId : req.userId;
-      // const _loadSaveData = await assignmentController.getSaveData(
-      //   userId,
-      //   module._id
-      // );
-      // let mappedSaveData = null;
-
-      // // attach user save data
-      // if (_loadSaveData) {
-      //   const {
-      //     currentProgress,
-      //     totalProgress,
-      //     saveData,
-      //     progress,
-      //     feedbackData,
-      //   } = _loadSaveData;
-
-      //   mappedSaveData = {
-      //     currentProgress,
-      //     totalProgress,
-      //     progress,
-      //     saveData,
-      //     feedbackData,
-      //   };
-      // }
-
       return res.status(OK).send(
         formatResponse('Successfully retrieve module', true, undefined, {
           id: module._id,
           moduleUUID: module.moduleUUID,
-          image : module.image,
-          title : module.title,
-          description : module.description,
+          image: module.image,
+          title: module.title,
+          description: module.description,
           contents: module.moduleContent[language] || {},
           // progress: mappedSaveData || {},
         })
@@ -105,7 +79,6 @@ const getDetailModule = (req, res) => {
     });
 };
 
-
 /**
  * get spesicfic module
  * @param {Object} req - express req
@@ -115,8 +88,8 @@ const getDetailModule = (req, res) => {
 const get = (isAdmin) => (req, res) => {
   const { moduleUUID, language } = req.query;
 
-  console.log(moduleUUID)
-  console.log(language)
+  console.log(moduleUUID);
+  console.log(language);
   ModuleModel.findOne({ moduleUUID })
     .then(async (module) => {
       // handle module not found
@@ -168,7 +141,6 @@ const get = (isAdmin) => (req, res) => {
     });
 };
 
-
 /**
  * get all modules
  * @param {Object} req - express req
@@ -176,13 +148,13 @@ const get = (isAdmin) => (req, res) => {
  * @returns controller to get all modules
  */
 const getAll = async (req, res) => {
-  const userId = req.userId
-  
-  const user = await UserModel.findById(userId)
+  const userId = req.userId;
+
+  const user = await UserModel.findById(userId);
   if (!user) {
     return res.status(UNAUTHORIZED).send(formatResponse(err.message, false));
   }
-  
+
   // get all data if role is admin, get only published if other role
   const query = user?.roles === 'admin' ? {} : { status: 'published' };
 
@@ -201,9 +173,40 @@ const getAll = async (req, res) => {
   );
 };
 
+/**
+ * delete a module without deleting the user assignment data
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to delete a module
+ */
+const deleteModule = (req, res) => {
+  const { moduleUUID } = req.params;
+
+  ModuleModel.findOneAndDelete({ moduleUUID })
+    .then((deletedModule) => {
+      if (!deletedModule) {
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Module doesn't exist", false, NOT_FOUND));
+      }
+
+      return res
+        .status(NO_CONTENT)
+        .send(
+          formatResponse(`Successfully deleted module ${moduleUUID}`, true)
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
 export default {
   create,
   get,
   getAll,
-  getDetailModule
+  getDetailModule,
+  deleteModule,
 };

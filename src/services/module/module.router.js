@@ -46,7 +46,6 @@ router
  * routes for get all modules
  */
 router.route('/all').get(
-  // validate(ModuleValidation.getModule),
   authenticate.auth(USER_ROLE),
   ModuleController.getAll
 );
@@ -60,6 +59,16 @@ router
     validate(ModuleValidation.getStudentModule),
     authenticate.auth(COUNSELOR_ROLE_ONLY),
     ModuleController.get(true)
+  );
+
+/**
+ * routes for delete specific module
+ */
+router
+  .route('/delete')
+  .delete(
+    authenticate.auth(ADMIN_ROLE_ONLY),
+    ModuleController.deleteModule
   );
 
 export default router;
