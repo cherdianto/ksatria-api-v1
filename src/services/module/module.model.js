@@ -19,6 +19,10 @@ const ModuleSchema = new mongoose.Schema({
     required: false,
     unique: true
   },
+  image: {
+    type: String,
+    required: false,
+  },
   description: {
     type: String,
     required: false

@@ -15,7 +15,7 @@ const router = Router();
 router
   .route('/register')
   .post(
-    validate(ModuleValidation.register),
+    // validate(ModuleValidation.register),
     authenticate.auth(ADMIN_ROLE_ONLY),
     ModuleController.create
   );
@@ -30,6 +30,17 @@ router
     authenticate.auth(USER_ROLE),
     ModuleController.get(false)
   );
+
+  /**
+ * routes for get spesific modules
+ */
+router
+.route('/detail')
+.get(
+  validate(ModuleValidation.getModule),
+  authenticate.auth(ADMIN_ROLE_ONLY),
+  ModuleController.getDetailModule
+);
 
 /**
  * routes for get all modules
