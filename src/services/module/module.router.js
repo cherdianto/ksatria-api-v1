@@ -65,7 +65,7 @@ router
  * routes for delete specific module
  */
 router
-  .route('/delete')
+  .route('/delete/:moduleUUID')
   .delete(
     authenticate.auth(ADMIN_ROLE_ONLY),
     ModuleController.deleteModule

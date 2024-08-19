@@ -191,7 +191,7 @@ const deleteModule = (req, res) => {
       }
 
       return res
-        .status(NO_CONTENT)
+        .status(OK)
         .send(
           formatResponse(`Successfully deleted module ${moduleUUID}`, true)
         );
