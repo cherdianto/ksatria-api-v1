@@ -147,7 +147,11 @@ const adminGetAll = (req, res) => {
 };
 
 // counselor get all students
-const getStudents = (isCounselor) => (req, res) => {
+const getStudents = (req, res) => {
+
+  // console.log(req.roles)
+
+  const isCounselor = req.roles === 'counselor' ? true : false;
   const filter = isCounselor ? { counselorId: req.userId } : req.body || {};
   const options = isCounselor
     ? '-password -__v -createdAt -updatedAt -counselorId -roles'

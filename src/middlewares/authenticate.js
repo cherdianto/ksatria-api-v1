@@ -65,6 +65,7 @@ const auth = (allowedRoles) => async (req, res, next) => {
 
     if (!allowedRoles.includes(roles)) return res.status(FORBIDDEN).send(formatResponse('Access denied.', false, FORBIDDEN));
 
+    req.roles = roles;
     req.userId = userId;
     req.username = username;
     return next();

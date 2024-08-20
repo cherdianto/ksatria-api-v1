@@ -36,8 +36,8 @@ router
   .route('/students')
   .get(
     validate(UserValidation.get),
-    authenticate.auth(ADMIN_ROLE_ONLY),
-    UserController.getStudents(false)
+    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    UserController.getStudents
   );
 
 /**
