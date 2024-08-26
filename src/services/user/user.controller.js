@@ -187,6 +187,39 @@ const getStudents = (req, res) => {
     });
 };
 
+// counselor get all students
+const getCounselors = (req, res) => {
+
+  UserModel.find({ roles: 'counselor' }).select('fullname _id')
+    .then((counselors) => {
+      // case db = empty
+      if (counselors.length === 0) {
+        return res
+          .status(OK)
+          .json(
+            formatResponse('No counselor found.',
+              true
+            )
+          );
+      }
+      return res
+        .status(OK)
+        .json(
+          formatResponse(
+            'Successfully retrieve all counselor data',
+            true,
+            undefined,
+            { counselors }
+          )
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
 /**
  * create new user
  * @param {Object} req - express req
@@ -467,6 +500,7 @@ const updateCounselor = (req, res) => {
 
 export default {
   getStudents,
+  getCounselors,
   create,
   getModules,
   updateIntro,

@@ -40,6 +40,17 @@ router
     UserController.getStudents
   );
 
+  /**
+ * routes for get all counselors
+ */
+router
+.route('/counselors')
+.get(
+  // validate(UserValidation.get),
+  authenticate.auth(USER_ROLE),
+  UserController.getCounselors
+);
+
 /**
  * routes for update user data by user
  */
