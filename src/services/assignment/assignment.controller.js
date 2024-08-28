@@ -1,10 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { UserController } from '../user';
+import { UserController, UserModel } from '../user';
 import { formatResponse } from '../../util';
 import constants from '../../constants';
 
 import AssignmentModel from './assignment.model';
+import moduleModel from '../module/module.model';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 
@@ -47,13 +48,11 @@ const get = (req, res) => {
           )
         : { [assignmentId]: saveData.get(assignmentId) };
 
-      return res
-        .status(OK)
-        .send(
-          formatResponse('Successfully retrieve sava data', true, undefined, {
-            assignment: mappedAssignment,
-          })
-        );
+      return res.status(OK).send(
+        formatResponse('Successfully retrieve sava data', true, undefined, {
+          assignment: mappedAssignment,
+        })
+      );
     })
     .catch((err) => {
       res
@@ -143,7 +142,7 @@ const feedback = async (req, res) => {
       updateObject[assignmentKey] = feedback;
     }
 
-    console.log(updateObject)
+    console.log(updateObject);
 
     // Find and update the document with the matching userId and moduleId
     const updatedDocument = await AssignmentModel.findOneAndUpdate(
@@ -166,7 +165,9 @@ const feedback = async (req, res) => {
       res.status(NOT_FOUND).send(formatResponse('Module not found', false));
     }
   } catch (error) {
-    res.status(INTERNAL_SERVER_ERROR).send(formatResponse(error.message, false));
+    res
+      .status(INTERNAL_SERVER_ERROR)
+      .send(formatResponse(error.message, false));
   }
 };
 
@@ -220,8 +221,44 @@ const load = (req, res) => {
 const getSaveData = (userId, moduleId) =>
   AssignmentModel.findOne({ userId, moduleId }).exec();
 
+/**
+ * get all modules
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to get all modules
+ */
+const getAll = async (req, res) => {
+  const userId = req.userId;
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    return res.status(UNAUTHORIZED).send(formatResponse(err.message, false));
+  }
+
+  // get all data if role is admin, get only published if other role
+  const query =
+    user?.roles === 'admin'
+      ? { type: 'assignment' }
+      : { status: 'published', type: 'assignment' };
+
+  const modules = await moduleModel
+    .find(query)
+    .select('title description status image moduleUUID');
+
+  if (!modules) {
+    return res.status(NOT_FOUND).send(formatResponse(err.message, false));
+  }
+
+  res.status(OK).send(
+    formatResponse('Successfully retreive all modules', true, undefined, {
+      modules,
+    })
+  );
+};
+
 export default {
   get,
+  getAll,
   save,
   feedback,
   load,

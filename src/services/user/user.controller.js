@@ -148,11 +148,9 @@ const adminGetAll = (req, res) => {
 
 // counselor get all students
 const getStudents = (req, res) => {
-
-  // console.log(req.roles)
-
   const isCounselor = req.roles === 'counselor' ? true : false;
-  const filter = isCounselor ? { counselorId: req.userId } : req.body || {};
+  const filter =
+    req.roles === 'counselor' ? { counselorId: req.userId } : req.body || {};
   const options = isCounselor
     ? '-password -__v -createdAt -updatedAt -counselorId -roles'
     : '-password -__v';
@@ -187,20 +185,45 @@ const getStudents = (req, res) => {
     });
 };
 
-// counselor get all students
-const getCounselors = (req, res) => {
+const getStudentsByPsychologist = async (req, res) => {
+  console.log(req.userId)
+  const counselors = await UserModel.find({ psychologistId: req.userId, roles: 'counselor'})
 
-  UserModel.find({ roles: 'counselor' }).select('fullname _id')
+  const counselorIds = counselors.map(counselor => counselor._id)
+
+  const allStudents = await UserModel.find({ counselorId: { $in: counselorIds}}).select('-password')
+  if (allStudents.length === 0) {
+    return res
+      .status(OK)
+      .json(
+        formatResponse('No student found.',
+          true
+        )
+      );
+  }
+  return res
+    .status(OK)
+    .json(
+      formatResponse(
+        'Successfully retrieve all user data',
+        true,
+        undefined,
+        { allStudents }
+      )
+    );
+
+
+
+  
+};
+
+const getCounselors = (req, res) => {
+  UserModel.find({ roles: 'counselor' })
+    .select('fullname _id')
     .then((counselors) => {
       // case db = empty
       if (counselors.length === 0) {
-        return res
-          .status(OK)
-          .json(
-            formatResponse('No counselor found.',
-              true
-            )
-          );
+        return res.status(OK).json(formatResponse('No counselor found.', true));
       }
       return res
         .status(OK)
@@ -210,6 +233,32 @@ const getCounselors = (req, res) => {
             true,
             undefined,
             { counselors }
+          )
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+const getPsychologists = (req, res) => {
+  UserModel.find({ roles: 'psychologist' })
+    .select('fullname _id')
+    .then((psychologist) => {
+      // case db = empty
+      if (psychologist.length === 0) {
+        return res.status(OK).json(formatResponse('No counselor found.', true));
+      }
+      return res
+        .status(OK)
+        .json(
+          formatResponse(
+            'Successfully retrieve all counselor data',
+            true,
+            undefined,
+            { psychologist }
           )
         );
     })
@@ -337,6 +386,7 @@ const adminUpdateUserData = (req, res) => {
     email,
     roles,
     counselorId,
+    psychologistId,
     status,
   } = req.body;
 
@@ -357,7 +407,8 @@ const adminUpdateUserData = (req, res) => {
       user.faculty = faculty || user.faculty;
       user.roles = roles || user.roles;
       user.status = status || user.status;
-      user.counselorId = counselorId || user.counselorId;
+      user.counselorId = roles === 'user' ? counselorId : null;
+      user.psychologistId = roles === 'counselor' ? psychologistId : null;
 
       return user.save();
     })
@@ -420,7 +471,6 @@ const getModules = (req, res) => {
 // const updateUserData = (userId, newData) =>
 //   UserModel.findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
 
-
 /**
  * updateUserData
  *
@@ -428,8 +478,8 @@ const getModules = (req, res) => {
  * @param {Object} newData - new user data
  * @returns controller to handling update some user data
  */
-const updateUserData = (userId, newData) => UserModel
-  .findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
+const updateUserData = (userId, newData) =>
+  UserModel.findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
 
 /**
  * updateIntro
@@ -511,4 +561,6 @@ export default {
   updateUserProfile,
   getUserData,
   adminUpdateUserData,
+  getPsychologists,
+  getStudentsByPsychologist
 };

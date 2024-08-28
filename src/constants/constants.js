@@ -15,6 +15,7 @@ export default {
   PSYCHOLOGIST: 'psychologist',
   USER_ROLE: ['admin', 'counselor', 'user', 'psychologist'],
   COUNSELOR_ROLE_ONLY: ['admin', 'counselor'],
+  COUNSELOR_PSYCHOLOGIST_ROLE_ONLY: ['admin', 'counselor', 'psychologist'],
   PSYCHOLOGIST_ROLE_ONLY: ['admin', 'psychologist'],
   ADMIN_ROLE_ONLY: ['admin'],
   USER_STATUS: ['active', 'inactive', 'pending'],

@@ -53,4 +53,13 @@ router
     AssignmentController.load
   );
 
+  /**
+ * routes for get all assignment
+ */
+router.route('/all').get(
+  authenticate.auth(USER_ROLE),
+  AssignmentController.getAll
+);
+
+
 export default router;

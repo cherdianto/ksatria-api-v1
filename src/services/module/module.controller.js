@@ -15,7 +15,8 @@ const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } =
  * @returns controller to register new module
  */
 const create = (req, res) => {
-  const { moduleUUID, moduleContent, image, description, title } = req.body;
+  const { moduleUUID, moduleContent, image, description, title, type } =
+    req.body;
   const newModule = {
     moduleUUID,
     moduleContent,
@@ -23,6 +24,7 @@ const create = (req, res) => {
     description,
     title,
     status: 'draft',
+    type,
   };
 
   ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, {
@@ -35,6 +37,39 @@ const create = (req, res) => {
         .send(
           formatResponse(`Successfully register module ${moduleUUID}`, true)
         );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * create or update existing module
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to register new module
+ */
+const update = (req, res) => {
+  const { moduleUUID, moduleContent, image, description, title, status } = req.body;
+  const newModule = {
+    moduleUUID,
+    moduleContent,
+    image,
+    description,
+    title,
+    status,
+  };
+
+  ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, {
+    new: true,
+    upsert: true,
+  })
+    .then(() => {
+      res
+        .status(CREATED)
+        .send(formatResponse(`Successfully update module ${moduleUUID}`, true));
     })
     .catch((err) => {
       res
@@ -68,6 +103,7 @@ const getDetailModule = (req, res) => {
           title: module.title,
           description: module.description,
           contents: module.moduleContent[language] || {},
+          status: module.status
           // progress: mappedSaveData || {},
         })
       );
@@ -88,8 +124,6 @@ const getDetailModule = (req, res) => {
 const get = (isAdmin) => (req, res) => {
   const { moduleUUID, language } = req.query;
 
-  console.log(moduleUUID);
-  console.log(language);
   ModuleModel.findOne({ moduleUUID })
     .then(async (module) => {
       // handle module not found
@@ -156,7 +190,10 @@ const getAll = async (req, res) => {
   }
 
   // get all data if role is admin, get only published if other role
-  const query = user?.roles === 'admin' ? {} : { status: 'published' };
+  const query =
+    user?.roles === 'admin'
+      ? { type: 'intervension' }
+      : { status: 'published', type: 'intervension' };
 
   const modules = await ModuleModel.find(query).select(
     'title description status image moduleUUID'
@@ -205,6 +242,7 @@ const deleteModule = (req, res) => {
 
 export default {
   create,
+  update,
   get,
   getAll,
   getDetailModule,

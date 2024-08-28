@@ -5,7 +5,7 @@ import ModuleController from './module.controller';
 import ModuleValidation from './module.validation';
 import constants from '../../constants';
 
-const { USER_ROLE, COUNSELOR_ROLE_ONLY, ADMIN_ROLE_ONLY } = constants;
+const { USER_ROLE, COUNSELOR_ROLE_ONLY, ADMIN_ROLE_ONLY, COUNSELOR_PSYCHOLOGIST_ROLE_ONLY } = constants;
 
 const router = Router();
 
@@ -19,6 +19,16 @@ router
     authenticate.auth(ADMIN_ROLE_ONLY),
     ModuleController.create
   );
+
+  /**
+ * routes for register new modules
+ */
+router
+.route('/update')
+.post(
+  authenticate.auth(ADMIN_ROLE_ONLY),
+  ModuleController.update
+);
 
 /**
  * routes for get spesific modules
@@ -57,7 +67,7 @@ router
   .route('/students')
   .get(
     validate(ModuleValidation.getStudentModule),
-    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    authenticate.auth(COUNSELOR_PSYCHOLOGIST_ROLE_ONLY),
     ModuleController.get(true)
   );
 

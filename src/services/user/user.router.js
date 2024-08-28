@@ -5,17 +5,20 @@ import UserController from './user.controller';
 import UserValidation from './user.validation';
 import constants from '../../constants';
 
-const { ADMIN_ROLE_ONLY, COUNSELOR_ROLE_ONLY, USER_ROLE } = constants;
+const {
+  ADMIN_ROLE_ONLY,
+  COUNSELOR_ROLE_ONLY,
+  USER_ROLE,
+  PSYCHOLOGIST_ROLE_ONLY,
+  COUNSELOR_PSYCHOLOGIST_ROLE_ONLY
+} = constants;
 
 const router = Router();
-
 
 /**
  * routes for user get his own data
  */
-router
-.route('/')
-.get(
+router.route('/').get(
   // validate(UserValidation.get),
   authenticate.auth(USER_ROLE),
   UserController.getUserData
@@ -24,10 +27,20 @@ router
 /**
  * routes for admin to get all user
  */
-router.route('/get-all').get(
-  authenticate.auth(ADMIN_ROLE_ONLY),
-  UserController.adminGetAll
-);
+router
+  .route('/get-all')
+  .get(authenticate.auth(ADMIN_ROLE_ONLY), UserController.adminGetAll);
+
+/**
+ * routes for get all user
+ */
+router
+  .route('/students-by-psychologist')
+  .get(
+    validate(UserValidation.get),
+    authenticate.auth(PSYCHOLOGIST_ROLE_ONLY),
+    UserController.getStudentsByPsychologist
+  );
 
 /**
  * routes for get all user
@@ -36,27 +49,32 @@ router
   .route('/students')
   .get(
     validate(UserValidation.get),
-    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    authenticate.auth(COUNSELOR_PSYCHOLOGIST_ROLE_ONLY),
     UserController.getStudents
   );
 
-  /**
+/**
  * routes for get all counselors
  */
-router
-.route('/counselors')
-.get(
+router.route('/counselors').get(
   // validate(UserValidation.get),
   authenticate.auth(USER_ROLE),
   UserController.getCounselors
 );
 
 /**
+ * routes for get all counselors
+ */
+router.route('/psychologists').get(
+  // validate(UserValidation.get),
+  authenticate.auth(USER_ROLE),
+  UserController.getPsychologists
+);
+
+/**
  * routes for update user data by user
  */
-router
-.route('/user-update')
-.post(
+router.route('/user-update').post(
   // validate(UserValidation.get),
   authenticate.auth(USER_ROLE),
   UserController.updateUserProfile
@@ -65,9 +83,7 @@ router
 /**
  * routes for update user data by admin
  */
-router
-.route('/admin-update')
-.post(
+router.route('/admin-update').post(
   // validate(UserValidation.get),
   authenticate.auth(ADMIN_ROLE_ONLY),
   UserController.adminUpdateUserData

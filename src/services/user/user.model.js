@@ -59,6 +59,9 @@ const UserSchema = new mongoose.Schema({
   counselorId: {
     type: mongoose.ObjectId
   },
+  psychologistId: {
+    type: mongoose.ObjectId
+  },
   modules: {
     type: Object,
     default: {

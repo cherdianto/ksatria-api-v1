@@ -30,6 +30,11 @@ const ModuleSchema = new mongoose.Schema({
   moduleContent: {
     type: Object,
     required: true
+  },
+  type: {
+    type: String,
+    enum: ['intervension', 'assignment'],
+    required: true
   }
 }, { timestamps: true, minimize: false });
 
