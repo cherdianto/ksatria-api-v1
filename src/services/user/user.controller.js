@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import constants from '../../constants';
 import { formatResponse } from '../../util';
 import UserModel from './user.model';
+import AssignmentModel from '../assignment/assignment.model';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 const {
@@ -186,35 +187,25 @@ const getStudents = (req, res) => {
 };
 
 const getStudentsByPsychologist = async (req, res) => {
-  console.log(req.userId)
-  const counselors = await UserModel.find({ psychologistId: req.userId, roles: 'counselor'})
+  console.log(req.userId);
+  const counselors = await UserModel.find({
+    psychologistId: req.userId,
+    roles: 'counselor',
+  });
 
-  const counselorIds = counselors.map(counselor => counselor._id)
+  const counselorIds = counselors.map((counselor) => counselor._id);
 
-  const allStudents = await UserModel.find({ counselorId: { $in: counselorIds}}).select('-password')
+  const allStudents = await UserModel.find({
+    counselorId: { $in: counselorIds },
+  }).select('-password');
   if (allStudents.length === 0) {
-    return res
-      .status(OK)
-      .json(
-        formatResponse('No student found.',
-          true
-        )
-      );
+    return res.status(OK).json(formatResponse('No student found.', true));
   }
-  return res
-    .status(OK)
-    .json(
-      formatResponse(
-        'Successfully retrieve all user data',
-        true,
-        undefined,
-        { allStudents }
-      )
-    );
-
-
-
-  
+  return res.status(OK).json(
+    formatResponse('Successfully retrieve all user data', true, undefined, {
+      allStudents,
+    })
+  );
 };
 
 const getCounselors = (req, res) => {
@@ -299,6 +290,23 @@ const create = (req, res) => {
         .status(INTERNAL_SERVER_ERROR)
         .send(formatResponse(err.message, false));
     });
+};
+
+const destroy = async (req, res) => {
+  const userId = req.query.id;
+  try {
+    await UserModel.findByIdAndDelete(userId);
+
+    await AssignmentModel.deleteMany({ userId });
+
+    return res
+      .status(OK)
+      .send(formatResponse(`Successfully delete user`, true));
+  } catch (error) {
+    res
+      .status(INTERNAL_SERVER_ERROR)
+      .send(formatResponse(error.message, false));
+  }
 };
 
 /**
@@ -552,6 +560,7 @@ export default {
   getStudents,
   getCounselors,
   create,
+  destroy,
   getModules,
   updateIntro,
   updateModules,
@@ -562,5 +571,5 @@ export default {
   getUserData,
   adminUpdateUserData,
   getPsychologists,
-  getStudentsByPsychologist
+  getStudentsByPsychologist,
 };

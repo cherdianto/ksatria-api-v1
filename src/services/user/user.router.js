@@ -10,7 +10,7 @@ const {
   COUNSELOR_ROLE_ONLY,
   USER_ROLE,
   PSYCHOLOGIST_ROLE_ONLY,
-  COUNSELOR_PSYCHOLOGIST_ROLE_ONLY
+  COUNSELOR_PSYCHOLOGIST_ROLE_ONLY,
 } = constants;
 
 const router = Router();
@@ -105,6 +105,13 @@ router.route('/register').post(
   // authenticate.auth(ADMIN_ROLE_ONLY),
   UserController.create
 );
+
+/**
+ * routes for delete user
+ */
+router
+  .route('/delete')
+  .delete(authenticate.auth(ADMIN_ROLE_ONLY), UserController.destroy);
 
 /**
  * routes for update intro
