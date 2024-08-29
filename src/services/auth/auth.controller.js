@@ -32,6 +32,12 @@ const login = (req, res) => {
           .send(formatResponse("Username doesn't exist", true, NOT_FOUND));
       }
 
+      if (user.status !== 'active') {
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Your account is under review or inactive, please contact our administrator", true, NOT_FOUND));
+      }
+
       // handle wrong password
       return user.comparePassword(password, (err, isMatch) => {
         if (err) throw err;
