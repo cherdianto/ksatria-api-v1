@@ -97,7 +97,7 @@ const invite = async (req, res) => {
   // generate a token
   const token = tokenGenerator();
   // sending invitation mail
-  const registrationLink = `http://localhost:3001/register?token=${token}`;
+  const registrationLink = `${process.env.CLIENT_URL}/register?token=${token}`;
 
   await InvitationModel.findOne({
     email,
