@@ -187,7 +187,6 @@ const getStudents = (req, res) => {
 };
 
 const getStudentsByPsychologist = async (req, res) => {
-  console.log(req.userId);
   const counselors = await UserModel.find({
     psychologistId: req.userId,
     roles: 'counselor',
