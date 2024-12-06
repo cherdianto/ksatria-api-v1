@@ -24,7 +24,7 @@ const bulkCreate = async (req, res) => {
   try {
     for (const data of bulkData) {
       // find the doccument with the specified email
-      const isRegistered = await UserModel.findOne({email: data.email})
+      const isRegistered = await UserModel.findOne({ email: data.email });
       // Find the document with the specified email
       const existingInvitation = await InvitationModel.findOne({
         email: data.email,
@@ -85,13 +85,13 @@ const bulkCreate = async (req, res) => {
 const invite = async (req, res) => {
   const { email, counselorId, role } = req.body;
 
-  const isRegistered = await UserModel.findOne({email})
-  if(isRegistered){
+  const isRegistered = await UserModel.findOne({ email });
+  if (isRegistered) {
     return res
-            .status(INTERNAL_SERVER_ERROR)
-            .send(
-              formatResponse('This email is already registered in our sistem', true)
-            ); 
+      .status(INTERNAL_SERVER_ERROR)
+      .send(
+        formatResponse('This email is already registered in our sistem', true)
+      );
   }
 
   // generate a token
@@ -109,7 +109,10 @@ const invite = async (req, res) => {
           return res
             .status(OK)
             .send(
-              formatResponse('This email is already registered in our sistem', true)
+              formatResponse(
+                'This email is already registered in our sistem',
+                true
+              )
             );
         } else {
           await InvitationModel.updateOne(
@@ -221,7 +224,7 @@ const registerUser = async (req, res) => {
         )
       );
   }
-  
+
   const newUser = new UserModel({
     email,
     semester,
@@ -308,45 +311,46 @@ const verify = async (req, res) => {
  * @returns controller to get paginated invitation data
  */
 const getAllInvitations = async (req, res) => {
-  const { page = 1, limit = 10, filter = {} } = req.query;
+  const { page = 1, pageSize = 10, filter = {} } = req.query; // Default page is 1, limit is 10
 
-  const skip = (page - 1) * limit;
-  const limitNum = parseInt(limit, 10);
+  // Ensure page and pageSize are numbers
+  const currentPage = parseInt(page, 10);
+  const limit = parseInt(pageSize, 10);
+  const query = {};
+  const projection = '-password -updatedAt -createdAt';
+  InvitationModel.countDocuments(query)
+    .then((total) => {
+      const totalPages = Math.ceil(total / limit);  // Calculate total pages
 
-  try {
-    const filterObject = {};
+      InvitationModel.find(query)
+        .select(projection)
+        .skip((currentPage - 1) * limit)  // Skip based on page number
+        .limit(limit)  // Limit to page size
+        .then((invitationData) => {
+          res.status(200).send(
+            formatResponse('Successfully retrieved user data', true, undefined, {
+              data: invitationData,
+              total,                 // Total number of documents
+              currentPage,           // Current page being viewed
+              pageSize: limit,       // Page size being used
+              totalPages,            // Total number of pages
+            })
+          );
+        })
+        .catch((err) => {
+          res
+            .status(500)
+            .send(formatResponse(err.message, false));
+        });
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .send(formatResponse(err.message, false));
+    });
 
-    // Apply filters if provided
-    if (filter.email) {
-      filterObject.email = { $regex: new RegExp(filter.email, 'i') };
-    }
-    if (filter.status) {
-      filterObject.status = filter.status;
-    }
-    if (filter.role) {
-      filterObject.role = filter.role;
-    }
-
-    const total = await InvitationModel.countDocuments(filterObject);
-    const invitations = await InvitationModel.find(filterObject)
-      .skip(skip)
-      .limit(limitNum)
-      .exec();
-
-    res.status(OK).send(
-      formatResponse('Successfully retrieved invitations', true, undefined, {
-        total,
-        page: parseInt(page, 10),
-        limit: limitNum,
-        invitations,
-      })
-    );
-  } catch (error) {
-    res
-      .status(INTERNAL_SERVER_ERROR)
-      .send(formatResponse(error.message, false));
-  }
 };
+
 
 /**
  * Delete an invitation
@@ -357,10 +361,8 @@ const getAllInvitations = async (req, res) => {
 const deleteInvitation = async (req, res) => {
   const { email } = req.params;
 
-  if(!email) {
-    return res
-        .status(NOT_FOUND)
-        .send(formatResponse('Email not found', false));
+  if (!email) {
+    return res.status(NOT_FOUND).send(formatResponse('Email not found', false));
   }
 
   try {
@@ -377,9 +379,7 @@ const deleteInvitation = async (req, res) => {
       .status(OK)
       .send(formatResponse('Invitation successfully deleted', true));
   } catch (err) {
-    res
-      .status(INTERNAL_SERVER_ERROR)
-      .send(formatResponse(err.message, false));
+    res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
   }
 };
 
@@ -389,5 +389,5 @@ export default {
   registerUser,
   verify,
   getAllInvitations,
-  deleteInvitation
+  deleteInvitation,
 };

@@ -47,10 +47,13 @@ app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
-        'http://localhost:3001',
-        'http://127.0.0.1:3001',
-        'https://ksatria-v1.cherdianto.com',
-        '*',
+        // 'http://localhost:3001',
+        // 'http://127.0.0.1:3001',
+        'http://ksa.cherdianto.com',
+        'https://ksa.cherdianto.com',
+        // '*',
+        // 'http://onlinecbtindonesia.web.rug.nl',
+        // 'https://onlinecbtindonesia.web.rug.nl',
       ];
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
@@ -59,11 +62,13 @@ app.use(
       }
     },
     credentials: true,
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Explicitly allow necessary methods
   })
 );
 
-// cron
-// const cronTask = {}
+// Handle preflight requests (OPTIONS)
+app.options('*', cors());
 
 app.use(cookieParser());
 app.use('/asset', express.static(path.join(__dirname, 'public')));
@@ -73,6 +78,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   console.log('Origin:', req.headers.origin);
   console.log('Referer:', req.headers.referer);
+  // res.setHeader('Access-Control-Allow-Origin', 'https://ksa.cherdianto.com');
+  // res.setHeader('Access-Control-Allow-Origin', 'https://onlinecbtindonesia.web.rug.nl');
+  // res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // if (req.method === "OPTIONS") {
+  //   return res.status(204).end(); // Respond with no content for preflight
+  // }
+  
   next();
 });
 
@@ -85,7 +100,7 @@ checkAndStartCronJob();
  * setup express route
  */
 app.get('/ping', (req, res) =>
-  res.status(OK).send(formatResponse('pong', true))
+  res.status(OK).send(formatResponse('pong v.1.0.3-test-1', true))
 );
 app.use(router);
 

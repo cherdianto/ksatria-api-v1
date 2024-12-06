@@ -54,10 +54,9 @@ const getUserData = (req, res) => {
 // get all user data based on role
 // PAGINATION AND FILTER
 const adminGetAll = (req, res) => {
-  // const userId = req.userId;
   const {
-    page = 1,
-    pageSize = 10,
+    page = 1,          // Default page to 1
+    pageSize = 10,     // Default pageSize to 10
     filters = {},
     globalFilter = {},
   } = req.query;
@@ -67,39 +66,21 @@ const adminGetAll = (req, res) => {
   try {
     parsedFilters = JSON.parse(filters);
   } catch (error) {
-    return res
-      .status(400)
-      .send(formatResponse('Invalid filters format', false));
+    return res.status(400).send(formatResponse('Invalid filters format', false));
   }
 
   const query = {};
   const projection = '-password -updatedAt -createdAt';
 
   // Apply filters if any
-  if (parsedFilters.email) {
-    query.email = parsedFilters.email;
-  }
-  if (parsedFilters.username) {
-    query.username = parsedFilters.username;
-  }
-  if (parsedFilters.fullname) {
-    query.fullname = parsedFilters.fullname;
-  }
-  if (parsedFilters.role) {
-    query.role = parsedFilters.role;
-  }
-  if (parsedFilters.semester) {
-    query.semester = parsedFilters.semester;
-  }
-  if (parsedFilters.faculty) {
-    query.faculty = parsedFilters.faculty;
-  }
-  if (parsedFilters.status) {
-    query.status = parsedFilters.status;
-  }
-  if (parsedFilters.whatsapp) {
-    query.whatsapp = parsedFilters.whatsapp;
-  }
+  if (parsedFilters.email) query.email = parsedFilters.email;
+  if (parsedFilters.username) query.username = parsedFilters.username;
+  if (parsedFilters.fullname) query.fullname = parsedFilters.fullname;
+  if (parsedFilters.role) query.role = parsedFilters.role;
+  if (parsedFilters.semester) query.semester = parsedFilters.semester;
+  if (parsedFilters.faculty) query.faculty = parsedFilters.faculty;
+  if (parsedFilters.status) query.status = parsedFilters.status;
+  if (parsedFilters.whatsapp) query.whatsapp = parsedFilters.whatsapp;
 
   // Apply global filter
   if (globalFilter) {
@@ -109,43 +90,47 @@ const adminGetAll = (req, res) => {
       { username: { $regex: globalFilter, $options: 'i' } },
       { whatsapp: { $regex: globalFilter, $options: 'i' } },
       { role: { $regex: globalFilter, $options: 'i' } },
-      // { semester: { $regex: globalFilter, $options: 'i' } },
       { faculty: { $regex: globalFilter, $options: 'i' } },
       { status: { $regex: globalFilter, $options: 'i' } },
     ];
   }
 
+  // Ensure page and pageSize are numbers
+  const currentPage = parseInt(page, 10);
+  const limit = parseInt(pageSize, 10);
+
   UserModel.countDocuments(query)
     .then((total) => {
+      const totalPages = Math.ceil(total / limit);  // Calculate total pages
+
       UserModel.find(query)
         .select(projection)
-        .skip((page - 1) * pageSize)
-        .limit(Number(pageSize))
+        .skip((currentPage - 1) * limit)  // Skip based on page number
+        .limit(limit)  // Limit to page size
         .then((userData) => {
-          res.status(OK).send(
-            formatResponse(
-              'Successfully retrieved user data',
-              true,
-              undefined,
-              {
-                data: userData,
-                total,
-              }
-            )
+          res.status(200).send(
+            formatResponse('Successfully retrieved user data', true, undefined, {
+              data: userData,
+              total,                 // Total number of documents
+              currentPage,           // Current page being viewed
+              pageSize: limit,       // Page size being used
+              totalPages,            // Total number of pages
+            })
           );
         })
         .catch((err) => {
           res
-            .status(INTERNAL_SERVER_ERROR)
+            .status(500)
             .send(formatResponse(err.message, false));
         });
     })
     .catch((err) => {
       res
-        .status(INTERNAL_SERVER_ERROR)
+        .status(500)
         .send(formatResponse(err.message, false));
     });
 };
+
 
 // counselor get all students
 const getStudents = (req, res) => {
