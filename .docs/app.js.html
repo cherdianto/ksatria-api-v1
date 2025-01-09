@@ -29,13 +29,15 @@
             <pre class="prettyprint source linenums"><code>import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
-import express from 'express'; import morganBody from 'morgan-body';
+import express from 'express';
+import morganBody from 'morgan-body';
 import cookieParser from 'cookie-parser';
 import { StatusCodes } from 'http-status-codes';
 
-import config from './config';
+// import config from './config';
 import router from './routes.index';
 import { formatResponse, logger } from './util';
+import { checkAndStartCronJob } from './services/invitation/invitation.cronjob';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,39 +52,93 @@ const app = express();
 /**
  * logging all server activity
  * @function
-*/
+ */
 morganBody(app, {
   stream: {
     write: (message) => {
       logger.info(message);
-    }
-  }
+    },
+  },
 });
 
 /**
  * setup express app
  */
-app.use(cors({
-  origin: [config.cors],
-  credentials: true,
-  optionSuccessStatus: 200
-}));
+// app.use(cors({
+//   // origin: [config.cors],
+//   origin: 'http://127.0.0.1:3001', // allow all origin to be working on dummy server
+//   credentials: true,
+//   optionSuccessStatus: 200
+// }));
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        // 'http://localhost:3001',
+        // 'http://127.0.0.1:3001',
+        // 'http://ksa.cherdianto.com',
+        // 'https://ksa.cherdianto.com',
+        // '*',
+        'http://onlinecbtindonesia.web.rug.nl',
+        'https://onlinecbtindonesia.web.rug.nl',
+      ];
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Explicitly allow necessary methods
+  })
+);
+
+// Handle preflight requests (OPTIONS)
+app.options('*', cors());
+
 app.use(cookieParser());
 app.use('/asset', express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use((req, res, next) => {
+  console.log('Origin:', req.headers.origin);
+  console.log('Referer:', req.headers.referer);
+  // res.setHeader('Access-Control-Allow-Origin', 'https://ksa.cherdianto.com');
+  // res.setHeader('Access-Control-Allow-Origin', 'https://onlinecbtindonesia.web.rug.nl');
+  // res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // if (req.method === "OPTIONS") {
+  //   return res.status(204).end(); // Respond with no content for preflight
+  // }
+  
+  next();
+});
+
+/*
+ * check invitation task
+ */
+checkAndStartCronJob();
+
 /**
  * setup express route
  */
-app.get('/ping', (req, res) => res.status(OK).send(formatResponse('pong', true)));
+app.get('/ping', (req, res) =>
+  res.status(OK).send(formatResponse('pong v.1.0.7', true))
+);
 app.use(router);
 
 /**
  * setup express middleware
  */
 app.use((req, res) => {
-  res.status(NOT_FOUND).json(formatResponse('Route not found', false, NOT_FOUND));
+  res
+    .status(NOT_FOUND)
+    .json(formatResponse('Route not found', false, NOT_FOUND));
 });
 
 export default app;
@@ -96,13 +152,13 @@ export default app;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#validate">validate</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#InvitationSchema">InvitationSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#TokenSchema">TokenSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#adminUpdateUserData">adminUpdateUserData</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#bulkCreate">bulkCreate</a></li><li><a href="global.html#changePasswordWithToken">changePasswordWithToken</a></li><li><a href="global.html#changeUserPassword">changeUserPassword</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#deleteInvitation">deleteInvitation</a></li><li><a href="global.html#deleteModule">deleteModule</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#generateResetPasswordLink">generateResetPasswordLink</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getAll">getAll</a></li><li><a href="global.html#getAllInvitations">getAllInvitations</a></li><li><a href="global.html#getDetailModule">getDetailModule</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#getUserData">getUserData</a></li><li><a href="global.html#invite">invite</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#update">update</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#updateUserProfile">updateUserProfile</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateResetPasswordLink">validateResetPasswordLink</a></li><li><a href="global.html#verify">verify</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Jul 19 2024 16:49:41 GMT+0700 (Western Indonesia Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Dec 16 2024 17:37:34 GMT+0700 (Western Indonesia Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { UserController, UserModel } from '../user';
-import { formatResponse } from '../../util';
-import constants from '../../constants';
+import { UserController, UserModel } from '../user/index.js';
+import { formatResponse } from '../../util/index.js';
+import constants from '../../constants/index.js';
 
-import AssignmentModel from './assignment.model';
-import moduleModel from '../module/module.model';
+import AssignmentModel from './assignment.model.js';
+import moduleModel from '../module/module.model.js';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 

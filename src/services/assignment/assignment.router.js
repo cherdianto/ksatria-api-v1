@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { authenticate, validate } from '../../middlewares';
-import AssignmentController from './assignment.controller';
-import AssignmentValidation from './assignment.validation';
-import constants from '../../constants';
+import { authenticate, validate } from '../../middlewares/index.js';
+import AssignmentController from './assignment.controller.js';
+import AssignmentValidation from './assignment.validation.js';
+import constants from '../../constants/index.js';
 
 const { USER_ROLE, COUNSELOR_ROLE_ONLY } = constants;
 

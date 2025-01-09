@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-import app from './app';
-import config from './config';
-import { logger } from './util';
-import UserModel from './services/user/user.model';
+import app from './app.js';
+import config from './config.js';
+import { logger } from './util/index.js';
+import UserModel from './services/user/user.model.js';
 
 /**
  * check if envy exist first

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-import config from '../config';
+import config from '../config.js';
 
 /**
  * generateAccessToken
@@ -10,7 +10,7 @@ import config from '../config';
  */
 const generateAccessToken = (payload) => jwt.sign(payload, config.secretKey, {
   algorithm: 'HS256',
-  expiresIn: '30m'
+  expiresIn: '360d'
 });
 
 /**
@@ -21,7 +21,7 @@ const generateAccessToken = (payload) => jwt.sign(payload, config.secretKey, {
  */
 const generateRefreshToken = (payload) => jwt.sign(payload, config.secretKeyRefresh, {
   algorithm: 'HS256',
-  expiresIn: '8h'
+  expiresIn: '360d'
 });
 
 export default {

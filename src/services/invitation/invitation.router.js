@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { authenticate, validate } from '../../middlewares';
-import constants from '../../constants';
-import invitationController from './invitation.controller';
+import { authenticate, validate } from '../../middlewares/index.js';
+import constants from '../../constants/index.js';
+import invitationController from './invitation.controller.js';
 
 const { ADMIN_ROLE_ONLY } = constants;
 

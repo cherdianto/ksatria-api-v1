@@ -1,9 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
 
-import ModuleModel from './module.model';
-import { formatResponse } from '../../util';
-import assignmentController from '../assignment/assignment.controller';
-import { UserModel } from '../user';
+import ModuleModel from './module.model.js';
+import { formatResponse } from '../../util/index.js';
+import assignmentController from '../assignment/assignment.controller.js';
+import { UserModel } from '../user/index.js';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } =
   StatusCodes;

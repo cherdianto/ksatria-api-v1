@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { authenticate, validate } from '../../middlewares';
-import UserController from './user.controller';
-import UserValidation from './user.validation';
-import constants from '../../constants';
+import { authenticate, validate } from '../../middlewares/index.js';
+import UserController from './user.controller.js';
+import UserValidation from './user.validation.js';
+import constants from '../../constants/index.js';
 
 const {
   ADMIN_ROLE_ONLY,

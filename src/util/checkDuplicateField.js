@@ -1,4 +1,4 @@
-import UserModel from '../services/user/user.model'
+import UserModel from '../services/user/user.model.js'
 
 const checkDuplicateField = async (field, value) => {
   const query = {};

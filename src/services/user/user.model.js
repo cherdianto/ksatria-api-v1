@@ -3,8 +3,8 @@
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
-import config from '../../config';
-import constants from '../../constants';
+import config from '../../config.js';
+import constants from '../../constants/index.js';
 
 const {
   USER, USER_ROLE, USER_STATUS, ACTIVE, LOCKED, UNLOCKED

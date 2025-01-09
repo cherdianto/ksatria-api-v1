@@ -6,7 +6,7 @@ import {
   ModuleRouter,
   UserRouter,
   InvitationRouter
-} from './services';
+} from './services/index.js';
 
 /**
  * express router

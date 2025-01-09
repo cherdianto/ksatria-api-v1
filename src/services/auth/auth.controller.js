@@ -3,13 +3,13 @@
 import { StatusCodes } from 'http-status-codes';
 import crypto from 'crypto';
 
-import { UserModel } from '../user';
-import TokenModel from '../token/token.model';
-import { formatResponse, jwt } from '../../util';
-import constants from '../../constants';
-import tokenGenerator from '../../util/tokenGenerator';
-import { sendEmail } from '../../util/emailNotification';
-import { comparePasswords } from '../../util/comparePassword';
+import { UserModel } from '../user/index.js';
+import TokenModel from '../token/token.model.js';
+import { formatResponse, jwt } from '../../util/index.js';
+import constants from '../../constants/index.js';
+import tokenGenerator from '../../util/tokenGenerator.js';
+import { sendEmail } from '../../util/emailNotification.js';
+import { comparePasswords } from '../../util/comparePassword.js';
 
 const { OK, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } = StatusCodes;
 

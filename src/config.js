@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-import constants from './constants';
-import logger from './util/logger';
+import constants from './constants/index.js';
+import logger from './util/logger.js';
 
 const { DEFAULT_PORT, DEFAULT_SALT_FACTOR, EMPTY_STRING } = constants;
 

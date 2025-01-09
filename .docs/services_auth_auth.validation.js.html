@@ -26,26 +26,64 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import Joi from 'joi';
+            <pre class="prettyprint source linenums"><code>/* eslint-disable */
+
+import { UNAUTHORIZED } from 'http-status-codes';
+import Joi from 'joi';
 
 /**
  * validator for login api
  * @constant
  */
-const login = {
+const login = (req, res, next) => {
+  const schema = Joi.object({
+    username: Joi.string().required().min(8).max(50).alphanum(),
+    password: Joi.string().required(),
+  });
+
+  const { error } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      message: error.details.map((detail) => detail.message).join(', '),
+    });
+  }
+
+  next();
+};
+
+const generateResetPasswordLink = {
   body: Joi.object().keys({
-    username:
-    Joi.string()
-      .required()
-      .min(8)
-      .max(50)
-      .alphanum(),
-    password: Joi.string().required()
-  })
+    email: Joi.string().email().required(),
+  }),
+};
+
+const validateResetPasswordLink = {
+  body: Joi.object().keys({
+    token: Joi.string().required(),
+  }),
+};
+
+const changePasswordWithToken = {
+  body: Joi.object().keys({
+    token: Joi.string().required(),
+    newPassword: Joi.string().required(),
+  }),
+};
+
+const changeUserPassword = {
+  body: Joi.object().keys({
+    oldPassword: Joi.string().required(),
+    newPassword: Joi.string().required(),
+  }),
 };
 
 export default {
-  login
+  login,
+  generateResetPasswordLink,
+  validateResetPasswordLink,
+  changePasswordWithToken,
+  changeUserPassword,
 };
 </code></pre>
         </article>
@@ -57,13 +95,13 @@ export default {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#validate">validate</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#InvitationSchema">InvitationSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#TokenSchema">TokenSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#adminUpdateUserData">adminUpdateUserData</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#bulkCreate">bulkCreate</a></li><li><a href="global.html#changePasswordWithToken">changePasswordWithToken</a></li><li><a href="global.html#changeUserPassword">changeUserPassword</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#deleteInvitation">deleteInvitation</a></li><li><a href="global.html#deleteModule">deleteModule</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#generateResetPasswordLink">generateResetPasswordLink</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getAll">getAll</a></li><li><a href="global.html#getAllInvitations">getAllInvitations</a></li><li><a href="global.html#getDetailModule">getDetailModule</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#getUserData">getUserData</a></li><li><a href="global.html#invite">invite</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#update">update</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#updateUserProfile">updateUserProfile</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateResetPasswordLink">validateResetPasswordLink</a></li><li><a href="global.html#verify">verify</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Jul 19 2024 16:49:41 GMT+0700 (Western Indonesia Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Dec 16 2024 17:37:34 GMT+0700 (Western Indonesia Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -5,7 +5,8 @@
   "scripts": {
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "fix": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "start": "cross-env NODE_ENV=development NODE_OPTIONS='--experimental-specifier-resolution=node' nodemon src/index",
+    "start": "node src/index.js",
+    "dev": "cross-env NODE_ENV=development NODE_OPTIONS='--experimental-specifier-resolution=node' nodemon src/index",
     "docs": "jsdoc -c ./.jsdoc.config.json",
     "docs-all": "jsdoc --access all -c ./.jsdoc.config.json"
   },

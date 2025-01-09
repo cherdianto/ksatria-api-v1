@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: services/module/module.validation.js</title>
+    <title>JSDoc: Source: services/invitation/invitation.model.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: services/module/module.validation.js</h1>
+    <h1 class="page-title">Source: services/invitation/invitation.model.js</h1>
 
     
 
@@ -26,47 +26,48 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import Joi from 'joi';
+            <pre class="prettyprint source linenums"><code>import mongoose from 'mongoose';
+import config from '../../config';
+import constants from '../../constants';
 
+const {
+  USER, USER_ROLE, INVITATION_STATUS, PENDING
+} = constants;
 /**
- * validator for register new module api
- * @constant
+ * Invitation model schema definition
  */
-const register = {
-  body: Joi.object().keys({
-    moduleUUID: Joi.string().required(),
-    moduleContent: Joi.object().required()
-  })
-};
+const InvitationSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    token: {
+      type: String,
+      // required: true,
+    },
+    status: {
+      type: String,
+      enum: INVITATION_STATUS,
+      default: PENDING
+    },
+    counselorId: {
+      type: mongoose.Types.ObjectId,
+      // required: true,
+      ref: 'User',
+    },
+    role: {
+      type: String,
+      enum: USER_ROLE,
+      default: USER,
+    },
+  },
+  { timestamps: true },
+  { versionKey: false }
+);
 
-/**
- * validator for get modules based on id
- * @constant
- */
-const getModule = {
-  query: Joi.object().keys({
-    moduleUUID: Joi.string().required(),
-    language: Joi.string().required().min(2).alphanum()
-  })
-};
-
-/**
- * validator for get modules based on user id
- * @constant
- */
-const getStudentModule = {
-  query: Joi.object().keys({
-    userId: Joi.string().required(),
-    moduleUUID: Joi.string().required(),
-    language: Joi.string().required().min(2).alphanum()
-  })
-};
-
-export default {
-  register,
-  getModule,
-  getStudentModule
-};
+export default mongoose.model('Invitation', InvitationSchema);
 </code></pre>
         </article>
     </section>

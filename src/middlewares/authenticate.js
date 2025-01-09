@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 
-import config from '../config';
-import { formatResponse, logger } from '../util';
+import config from '../config.js';
+import { formatResponse, logger } from '../util/index.js';
 
 const { UNAUTHORIZED, FORBIDDEN } = StatusCodes;
 
@@ -15,6 +15,8 @@ const { UNAUTHORIZED, FORBIDDEN } = StatusCodes;
  */
 const _checkRefreshToken = (req) => {
   const refreshToken = req.cookies?.refreshToken;
+  console.log(refreshToken)
+  logger.info('refreshToken ' + refreshToken)
 
   if (!refreshToken) throw new Error('Access denied. No refresh token provided.');
 

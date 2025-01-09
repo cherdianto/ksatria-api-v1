@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { authenticate, validate } from '../../middlewares';
-import ModuleController from './module.controller';
-import ModuleValidation from './module.validation';
-import constants from '../../constants';
+import { authenticate, validate } from '../../middlewares/index.js';
+import ModuleController from './module.controller.js';
+import ModuleValidation from './module.validation.js';
+import constants from '../../constants/index.js';
 
 const { USER_ROLE, COUNSELOR_ROLE_ONLY, ADMIN_ROLE_ONLY, COUNSELOR_PSYCHOLOGIST_ROLE_ONLY } = constants;
 

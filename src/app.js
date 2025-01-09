@@ -7,9 +7,9 @@ import cookieParser from 'cookie-parser';
 import { StatusCodes } from 'http-status-codes';
 
 // import config from './config';
-import router from './routes.index';
-import { formatResponse, logger } from './util';
-import { checkAndStartCronJob } from './services/invitation/invitation.cronjob';
+import router from './routes.index.js';
+import { formatResponse, logger } from './util/index.js';
+import { checkAndStartCronJob } from './services/invitation/invitation.cronjob.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -47,10 +47,10 @@ app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
-        // 'http://localhost:3001',
-        // 'http://127.0.0.1:3001',
-        'http://ksa.cherdianto.com',
-        'https://ksa.cherdianto.com',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001',
+        // 'http://ksa.cherdianto.com',
+        // 'https://ksa.cherdianto.com',
         // '*',
         // 'http://onlinecbtindonesia.web.rug.nl',
         // 'https://onlinecbtindonesia.web.rug.nl',
@@ -63,7 +63,7 @@ app.use(
     },
     credentials: true,
     allowedHeaders: ['Authorization', 'Content-Type'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Explicitly allow necessary methods
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Explicitly allow necessary methods
   })
 );
 
@@ -78,15 +78,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   console.log('Origin:', req.headers.origin);
   console.log('Referer:', req.headers.referer);
-  // res.setHeader('Access-Control-Allow-Origin', 'https://ksa.cherdianto.com');
+  // UNCOMMENT BELOW FOR RUG
+  // res.setHeader('Access-Control-Allow-Origin', 'http://onlinecbtindonesia.web.rug.nl');
   // res.setHeader('Access-Control-Allow-Origin', 'https://onlinecbtindonesia.web.rug.nl');
+  // res.setHeader('Access-Control-Allow-Origin', '*');
   // res.setHeader('Access-Control-Allow-Credentials', 'true');
-  // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
-  // if (req.method === "OPTIONS") {
-  //   return res.status(204).end(); // Respond with no content for preflight
-  // }
+  if (req.method === "OPTIONS") {
+    return res.status(204).end(); // Respond with no content for preflight
+  }
   
   next();
 });
@@ -100,7 +102,7 @@ checkAndStartCronJob();
  * setup express route
  */
 app.get('/ping', (req, res) =>
-  res.status(OK).send(formatResponse('pong v.1.0.3-test-1', true))
+  res.status(OK).send(formatResponse('pong v.1.0.8 test 2', true))
 );
 app.use(router);
 
