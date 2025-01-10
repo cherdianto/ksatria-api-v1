@@ -49,6 +49,7 @@ const login = (req, res) => {
             userId: user._id,
             username: user.username,
             roles: user.roles,
+            email: user.email,
           };
 
           return res
@@ -85,6 +86,8 @@ const login = (req, res) => {
  * @returns controller to handling refresh access token
  */
 const refresh = (req, res) => {
+  console.log('refresh')
+  console.log(req)
   const { userId, username, roles } = req;
   const tokenPayload = { userId, username, roles };
 

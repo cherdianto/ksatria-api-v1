@@ -66,9 +66,17 @@ const load = {
   }),
 };
 
+const overallFeedback = {
+  body: Joi.object().keys({
+    userId: Joi.string().required(),
+    moduleUUID: Joi.string().required(),
+  }),
+};
+
 export default {
   get,
   load,
   save,
   feedback,
+  overallFeedback
 };

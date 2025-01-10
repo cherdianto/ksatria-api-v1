@@ -23,6 +23,11 @@ const passwordChangedTemplate = fs.readFileSync(
   'utf-8'
 );
 
+const feedbackNotification = fs.readFileSync(
+  'src/templates/email_templates/feedback_notification.html',
+  'utf-8'
+);
+
 // Function to send an email with template
 export const sendEmail = async ({
   recipientEmail,
@@ -62,6 +67,13 @@ export const sendEmail = async ({
         dynamicData.fullname
       );
       emailSubject = subject || 'Password Change Notification';
+      break;
+    case 'feedback_notification':
+      htmlTemplate = feedbackNotification.replace(
+        '{{moduleUUID}}',
+        dynamicData.moduleUUID
+      );
+      emailSubject = subject || 'Feedback Notification';
       break;
     default:
       throw new Error('Invalid template type');

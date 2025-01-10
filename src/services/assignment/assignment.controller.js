@@ -6,6 +6,8 @@ import constants from '../../constants/index.js';
 
 import AssignmentModel from './assignment.model.js';
 import moduleModel from '../module/module.model.js';
+import assignmentModel from './assignment.model.js';
+import { sendEmail } from '../../util/emailNotification.js';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 
@@ -171,6 +173,67 @@ const feedback = async (req, res) => {
   }
 };
 
+const overallFeedback = async (req, res) => {
+  const { userId, moduleUUID} = req.body;
+ 
+  
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    return res.status(UNAUTHORIZED).send(formatResponse(err.message, false));
+  }
+
+  try {
+        // Find and update the document with the matching userId and moduleId
+    const document = await AssignmentModel.findOne({ userId, moduleUUID });
+
+    if (!document) {
+      // If the document is not found
+      return res
+        .status(NOT_FOUND)
+        .send(formatResponse('Module not found', false));
+    }
+
+    if (document.overallFeedback === 'true') {
+      // If it's already true, no need to update
+      return res.status(OK).send(
+        formatResponse('Notification already sent', true, undefined, {
+          overallFeedback: document.overallFeedback,
+        })
+      );
+    }
+
+    const updatedDocument = await AssignmentModel.findOneAndUpdate(
+      { userId, moduleUUID },
+      { $set: {
+        overallFeedback: true
+      } },
+      { new: true } // Return the updated document
+    );
+
+    if (updatedDocument) {
+
+     user?.email && await sendEmail({
+        recipientEmail: user.email,
+        subject: 'Feedback dari konselor telah tersedia',
+        templateType: 'feedback_notification',
+        dynamicData: {moduleUUID},
+      });
+
+      res.status(CREATED).send(
+        formatResponse('Successfully sending notification', true, undefined, {
+          overallFeedback: updatedDocument.overallFeedback,
+        })
+      );
+    } else {
+      res.status(NOT_FOUND).send(formatResponse('Module not found', false));
+    }
+  } catch (error) {
+    res
+      .status(INTERNAL_SERVER_ERROR)
+      .send(formatResponse(error.message, false));
+  }
+};
+
 /**
  * load
  *
@@ -256,6 +319,35 @@ const getAll = async (req, res) => {
   );
 };
 
+
+const getAllAssignment = async (req, res) => {
+  const userId = req.userId;
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    return res.status(UNAUTHORIZED).send(formatResponse(err.message, false));
+  }
+
+  // get all data if role is admin, get only published if other role
+  const query =
+    user?.roles === 'admin'
+      ? { type: 'assignment' }
+      : { status: 'published', type: 'assignment' };
+
+  const assignments = await AssignmentModel
+    .find({userId})
+
+  if (!assignments) {
+    return res.status(NOT_FOUND).send(formatResponse(err.message, false));
+  }
+
+  res.status(OK).send(
+    formatResponse('Successfully retreive all assignments', true, undefined, {
+      assignments,
+    })
+  );
+};
+
 export default {
   get,
   getAll,
@@ -263,4 +355,6 @@ export default {
   feedback,
   load,
   getSaveData,
+  overallFeedback,
+  getAllAssignment
 };

@@ -42,6 +42,14 @@ router
     AssignmentController.feedback
   );
 
+  router
+  .route('/overall-feedback')
+  .post(
+    validate(AssignmentValidation.overallFeedback),
+    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    AssignmentController.overallFeedback
+  );
+
 /**
  * routes for save assignment
  */
@@ -59,6 +67,11 @@ router
 router.route('/all').get(
   authenticate.auth(USER_ROLE),
   AssignmentController.getAll
+);
+
+router.route('/allAssignment').get(
+  authenticate.auth(USER_ROLE),
+  AssignmentController.getAllAssignment
 );
 
 

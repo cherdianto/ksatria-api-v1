@@ -34,10 +34,11 @@ const _checkRefreshToken = (req) => {
  */
 const refresh = (req, res, next) => {
   try {
-    const { userId, username, roles } = _checkRefreshToken(req);
+    const { userId, username, roles, email } = _checkRefreshToken(req);
     req.userId = userId;
     req.username = username;
     req.roles = roles;
+    req.email = email;
     next();
   } catch (error) {
     logger.error('Failed to Authorized', error);

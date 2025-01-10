@@ -53,6 +53,10 @@ const AssignmentSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    overallFeedback: {
+      type: String,
+      // required: true,
+    },
   },
   { timestamps: true, minimize: false }
 );
