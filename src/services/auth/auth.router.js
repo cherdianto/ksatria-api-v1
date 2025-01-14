@@ -22,12 +22,13 @@ router
  */
 router
   .route('/logout')
-  .post(authenticate.auth(constants.USER_ROLE), AuthController.logout);
+  // .post(authenticate.auth(constants.USER_ROLE), AuthController.logout);
+  .post(AuthController.logout);
 
 /**
  * routes for ping logged in user
  */
-router.route('/refresh').post(authenticate.refresh, AuthController.refresh);
+router.route('/refresh').get(authenticate.refresh, AuthController.refresh);
 
 /**
  * routes for ping logged in user

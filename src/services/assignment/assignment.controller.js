@@ -144,8 +144,6 @@ const feedback = async (req, res) => {
       updateObject[assignmentKey] = feedback;
     }
 
-    console.log(updateObject);
-
     // Find and update the document with the matching userId and moduleId
     const updatedDocument = await AssignmentModel.findOneAndUpdate(
       { userId, moduleId },

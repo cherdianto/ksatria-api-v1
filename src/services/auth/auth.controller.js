@@ -56,12 +56,18 @@ const login = (req, res) => {
             .cookie(
               'refreshToken',
               jwt.generateRefreshToken(tokenPayload),
-              constants.cookieOptions(false)
+              {
+                httpOnly: true,
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+                secure: true,
+                sameSite: 'None',
+              }
             )
             .status(OK)
             .send(
               formatResponse('Successfully login', true, undefined, {
                 token: jwt.generateAccessToken(tokenPayload),
+                user: user,
               })
             );
         }
@@ -86,8 +92,6 @@ const login = (req, res) => {
  * @returns controller to handling refresh access token
  */
 const refresh = (req, res) => {
-  console.log('refresh')
-  console.log(req)
   const { userId, username, roles } = req;
   const tokenPayload = { userId, username, roles };
 

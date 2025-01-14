@@ -1,21 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
-
 import config from '../config.js';
 import { formatResponse, logger } from '../util/index.js';
 
 const { UNAUTHORIZED, FORBIDDEN } = StatusCodes;
 
-/**
- * checkRefreshToken
- * @param {Object} req - express req
- *
- * @returns function to check refresh token
- * @private
- */
 const _checkRefreshToken = (req) => {
   const refreshToken = req.cookies?.refreshToken;
-  console.log(refreshToken)
   logger.info('refreshToken ' + refreshToken)
 
   if (!refreshToken) throw new Error('Access denied. No refresh token provided.');
@@ -23,15 +14,7 @@ const _checkRefreshToken = (req) => {
   return jwt.verify(refreshToken, config.secretKeyRefresh);
 };
 
-/**
- * authenticate middleware
- * @param {String[]} allowedRoles - allowed roles to access the routes
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @param {Object} next - express next
- *
- * @returns middleware to check if user can access the route
- */
+
 const refresh = (req, res, next) => {
   try {
     const { userId, username, roles, email } = _checkRefreshToken(req);
@@ -47,15 +30,6 @@ const refresh = (req, res, next) => {
   }
 };
 
-/**
- * authenticate middleware
- * @param {String[]} allowedRoles - allowed roles to access the routes
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @param {Object} next - express next
- *
- * @returns middleware to check if user can access the route
- */
 const auth = (allowedRoles) => async (req, res, next) => {
   const accessToken = req.headers?.authorization?.split(' ')[1];
 
