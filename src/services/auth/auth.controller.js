@@ -102,26 +102,14 @@ const refresh = (req, res) => {
   );
 };
 
-/**
- * logout
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling logout and remove cookie
- */
+
 const logout = (req, res) =>
   res
     .cookie('refreshToken', '', constants.cookieOptions(true))
     .status(OK)
     .send(formatResponse('Successfully logout', true));
 
-/**
- * validate reset password link
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling reset password link
- */
+
 const validateResetPasswordLink = (req, res) => {
   const { token } = req.body;
 
@@ -146,13 +134,6 @@ const validateResetPasswordLink = (req, res) => {
     });
 };
 
-/**
- * generate reset password
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling generation of reset link
- */
 const generateResetPasswordLink = async (req, res) => {
   const { email } = req.body;
 
@@ -206,13 +187,6 @@ const generateResetPasswordLink = async (req, res) => {
   }
 };
 
-/**
- * change password with token
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling reset password link
- */
 const changePasswordWithToken = (req, res) => {
   const { newPassword, token } = req.body;
 
