@@ -115,15 +115,9 @@ const getDetailModule = (req, res) => {
     });
 };
 
-/**
- * get spesicfic module
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to get specific module
- */
 const get = (isAdmin) => (req, res) => {
   const { moduleUUID, language } = req.query;
-
+  
   ModuleModel.findOne({ moduleUUID })
     .then(async (module) => {
       // handle module not found
@@ -134,6 +128,7 @@ const get = (isAdmin) => (req, res) => {
       }
 
       const userId = isAdmin ? req.query.userId : req.userId;
+
       const _loadSaveData = await assignmentController.getSaveData(
         userId,
         module._id
@@ -160,7 +155,7 @@ const get = (isAdmin) => (req, res) => {
       }
 
       return res.status(OK).send(
-        formatResponse('Successfully retrieve module', true, undefined, {
+        formatResponse('Successfully retrieve module saved data', true, undefined, {
           id: module._id,
           moduleUUID: module.moduleUUID,
           contents: module.moduleContent[language] || {},

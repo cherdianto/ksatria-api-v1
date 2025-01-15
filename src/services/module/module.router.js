@@ -36,7 +36,7 @@ router
 router
   .route('/')
   .get(
-    validate(ModuleValidation.getModule),
+    // validate(ModuleValidation.getModule),
     authenticate.auth(USER_ROLE),
     ModuleController.get(false)
   );

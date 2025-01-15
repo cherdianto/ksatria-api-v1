@@ -272,22 +272,9 @@ const load = (req, res) => {
     });
 };
 
-/**
- * getSaveData
- *
- * @param {string} userId - user Id
- * @param {string} moduleId - module Id
- * @returns get save data for spesific user and module
- */
 const getSaveData = (userId, moduleId) =>
   AssignmentModel.findOne({ userId, moduleId }).exec();
 
-/**
- * get all modules
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to get all modules
- */
 const getAll = async (req, res) => {
   const userId = req.userId;
 

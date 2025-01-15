@@ -12,12 +12,6 @@ import { startCronJob } from './invitation.cronjob.js';
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 const { ACTIVE, PENDING, USER, REGISTERED } = constants;
 
-/**
- * create new user
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to register bulk invitation
- */
 const bulkCreate = async (req, res) => {
   const { bulkData } = req.body;
 
@@ -76,12 +70,6 @@ const bulkCreate = async (req, res) => {
   }
 };
 
-/**
- * create new user
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to register bulk invitation
- */
 const invite = async (req, res) => {
   const { email, counselorId, role } = req.body;
 
@@ -168,12 +156,6 @@ const invite = async (req, res) => {
     });
 };
 
-/**
- * create new user
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to register new user
- */
 const registerUser = async (req, res) => {
   const isTokenExist = await InvitationModel.findOne({ token: req.body.token });
 
@@ -267,12 +249,6 @@ const registerUser = async (req, res) => {
     });
 };
 
-/**
- * create new user
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to register new user
- */
 const verify = async (req, res) => {
   const isTokenExist = await InvitationModel.findOne({ token: req.body.token });
 
@@ -304,12 +280,6 @@ const verify = async (req, res) => {
   );
 };
 
-/**
- * Retrieve all invitation data with pagination
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to get paginated invitation data
- */
 const getAllInvitations = async (req, res) => {
   const { page = 1, pageSize = 10, filter = {} } = req.query; // Default page is 1, limit is 10
 
@@ -352,12 +322,6 @@ const getAllInvitations = async (req, res) => {
 };
 
 
-/**
- * Delete an invitation
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to delete an invitation
- */
 const deleteInvitation = async (req, res) => {
   const { email } = req.params;
 
