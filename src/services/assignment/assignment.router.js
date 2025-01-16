@@ -5,7 +5,7 @@ import AssignmentController from './assignment.controller.js';
 import AssignmentValidation from './assignment.validation.js';
 import constants from '../../constants/index.js';
 
-const { USER_ROLE, COUNSELOR_ROLE_ONLY } = constants;
+const { USER_ROLE, COUNSELOR_ROLE_ONLY, ADMIN_ROLE_ONLY } = constants;
 
 const router = Router();
 
@@ -31,9 +31,7 @@ router
     AssignmentController.save
   );
 
-/**
- * routes for save assignment
- */
+
 router
   .route('/feedback')
   .post(
@@ -50,9 +48,6 @@ router
     AssignmentController.overallFeedback
   );
 
-/**
- * routes for save assignment
- */
 router
   .route('/load')
   .get(
@@ -61,9 +56,6 @@ router
     AssignmentController.load
   );
 
-  /**
- * routes for get all assignment
- */
 router.route('/all').get(
   authenticate.auth(USER_ROLE),
   AssignmentController.getAll
@@ -73,6 +65,13 @@ router.route('/allAssignment').get(
   authenticate.auth(USER_ROLE),
   AssignmentController.getAllAssignment
 );
+
+router
+  .route('/export')
+  .get(
+    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    AssignmentController.exportData
+  );
 
 
 export default router;

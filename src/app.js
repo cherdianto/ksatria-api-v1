@@ -77,7 +77,7 @@ app.use((req, res, next) => {
 checkAndStartCronJob();
 
 app.get('/ping', (req, res) =>
-  res.status(OK).send(formatResponse('pong v.1.0.10', true))
+  res.status(OK).send(formatResponse('pong v.1.0.11', true))
 );
 app.use(router);
 

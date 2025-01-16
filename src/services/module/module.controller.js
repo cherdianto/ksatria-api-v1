@@ -1,5 +1,4 @@
 import { StatusCodes } from 'http-status-codes';
-
 import ModuleModel from './module.model.js';
 import { formatResponse } from '../../util/index.js';
 import assignmentController from '../assignment/assignment.controller.js';
@@ -8,12 +7,6 @@ import { UserModel } from '../user/index.js';
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } =
   StatusCodes;
 
-/**
- * create or update existing module
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to register new module
- */
 const create = (req, res) => {
   const { moduleUUID, moduleContent, image, description, title, type } =
     req.body;
@@ -45,12 +38,6 @@ const create = (req, res) => {
     });
 };
 
-/**
- * create or update existing module
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to register new module
- */
 const update = (req, res) => {
   const { moduleUUID, moduleContent, image, description, title, status } = req.body;
   const newModule = {
@@ -78,12 +65,6 @@ const update = (req, res) => {
     });
 };
 
-/**
- * get spesicfic module
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to get specific module
- */
 const getDetailModule = (req, res) => {
   const { moduleUUID, language } = req.query;
   ModuleModel.findOne({ moduleUUID })
@@ -170,12 +151,6 @@ const get = (isAdmin) => (req, res) => {
     });
 };
 
-/**
- * get all modules
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to get all modules
- */
 const getAll = async (req, res) => {
   const userId = req.userId;
 
@@ -205,12 +180,6 @@ const getAll = async (req, res) => {
   );
 };
 
-/**
- * delete a module without deleting the user assignment data
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to delete a module
- */
 const deleteModule = (req, res) => {
   const { moduleUUID } = req.params;
 

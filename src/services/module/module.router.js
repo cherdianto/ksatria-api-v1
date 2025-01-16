@@ -20,9 +20,6 @@ router
     ModuleController.create
   );
 
-  /**
- * routes for register new modules
- */
 router
 .route('/update')
 .post(
@@ -30,9 +27,6 @@ router
   ModuleController.update
 );
 
-/**
- * routes for get spesific modules
- */
 router
   .route('/')
   .get(
@@ -41,9 +35,6 @@ router
     ModuleController.get(false)
   );
 
-  /**
- * routes for get spesific modules
- */
 router
 .route('/detail')
 .get(
@@ -52,17 +43,11 @@ router
   ModuleController.getDetailModule
 );
 
-/**
- * routes for get all modules
- */
 router.route('/all').get(
   authenticate.auth(USER_ROLE),
   ModuleController.getAll
 );
 
-/**
- * routes for get spesific student modules
- */
 router
   .route('/students')
   .get(

@@ -1,9 +1,6 @@
 import Joi from 'joi';
 
-/**
- * validator for register new module api
- * @constant
- */
+
 const register = {
   body: Joi.object().keys({
     moduleUUID: Joi.string().required(),
@@ -11,10 +8,6 @@ const register = {
   })
 };
 
-/**
- * validator for get modules based on id
- * @constant
- */
 const getModule = {
   query: Joi.object().keys({
     moduleUUID: Joi.string().required(),
@@ -23,10 +16,6 @@ const getModule = {
   })
 };
 
-/**
- * validator for get modules based on user id
- * @constant
- */
 const getStudentModule = {
   query: Joi.object().keys({
     userId: Joi.string().required(),

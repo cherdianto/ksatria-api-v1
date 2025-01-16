@@ -8,6 +8,7 @@ import AssignmentModel from './assignment.model.js';
 import moduleModel from '../module/module.model.js';
 import assignmentModel from './assignment.model.js';
 import { sendEmail } from '../../util/emailNotification.js';
+import XLSX from 'xlsx'
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 
@@ -333,6 +334,76 @@ const getAllAssignment = async (req, res) => {
   );
 };
 
+const exportData = async (req, res) => {
+  try {
+    const assignments = await AssignmentModel.find().populate('userId');
+    
+    console.log('Fetched assignments:', assignments);
+
+    // Group assignments by moduleUUID
+    const groupedByModule = assignments.reduce((acc, assignment) => {
+      if (!acc[assignment.moduleUUID]) {
+        acc[assignment.moduleUUID] = [];
+      }
+      acc[assignment.moduleUUID].push(assignment);
+      return acc;
+    }, {});
+
+    // Iterate over each grouped module
+    for (let moduleUUID in groupedByModule) {
+      const moduleAssignments = groupedByModule[moduleUUID];
+      
+      const workbook = XLSX.utils.book_new();
+
+      // For each assignment in the group, create a sheet named by userId.fullname
+      for (let assignment of moduleAssignments) {
+        const rows = [];
+
+        // Check if saveData exists and is a Map
+        if (assignment.saveData && assignment.saveData instanceof Map) {
+          // Iterate over the Map using forEach to access key-value pairs
+          assignment.saveData.forEach((save, key) => {
+            // Push data from saveData into rows
+            rows.push({
+              assignmentId: save.assignmentId,
+              question: save.question,
+              answer: save.answer,
+              feedbackData: save.feedbackData || 'n/a',  // Use 'n/a' if feedbackData is missing
+            });
+          });
+        } else {
+          console.log(`No valid saveData found for assignment ${assignment._id}`);
+        }
+
+        // Convert rows to a worksheet
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+
+        // Append the worksheet to the workbook, using the user full name as the sheet name
+        const userFullName = assignment.userId ? assignment.userId.fullname : 'Unknown User';
+        XLSX.utils.book_append_sheet(workbook, worksheet, userFullName);
+      }
+
+      // Create a filename based on moduleUUID
+      const fileName = `${moduleUUID}.xlsx`;
+
+      // Write the workbook to a file
+      XLSX.writeFile(workbook, fileName);
+
+      console.log(`File for module ${moduleUUID} created successfully.`);
+    }
+
+    // Send success response
+    res.status(OK).send(
+      formatResponse('Successfully exported all assignments', true, undefined)
+    );
+  } catch (error) {
+    console.log('Error during export:', error.message);
+    return res.status(INTERNAL_SERVER_ERROR).send(formatResponse(error.message, false));
+  }
+};
+
+
+
 export default {
   get,
   getAll,
@@ -341,5 +412,6 @@ export default {
   load,
   getSaveData,
   overallFeedback,
-  getAllAssignment
+  getAllAssignment,
+  exportData
 };
