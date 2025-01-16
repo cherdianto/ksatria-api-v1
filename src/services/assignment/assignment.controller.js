@@ -9,6 +9,7 @@ import moduleModel from '../module/module.model.js';
 import assignmentModel from './assignment.model.js';
 import { sendEmail } from '../../util/emailNotification.js';
 import XLSX from 'xlsx'
+import archiver from 'archiver';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 
@@ -349,10 +350,22 @@ const exportData = async (req, res) => {
       return acc;
     }, {});
 
-    // Iterate over each grouped module
+    // Create a zip stream to package all the files
+    const zipFileName = 'assignments.zip';
+    const zipStream = archiver('zip', { zlib: { level: 9 } });
+
+    // Set up the response headers for downloading the .zip file
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename=${zipFileName}`);
+    
+    // Pipe the zipStream to the response
+    zipStream.pipe(res);
+
+    // Iterate over each module group
     for (let moduleUUID in groupedByModule) {
       const moduleAssignments = groupedByModule[moduleUUID];
-      
+
+      // For each module, create a workbook and add the user sheets
       const workbook = XLSX.utils.book_new();
 
       // For each assignment in the group, create a sheet named by userId.fullname
@@ -386,16 +399,15 @@ const exportData = async (req, res) => {
       // Create a filename based on moduleUUID
       const fileName = `${moduleUUID}.xlsx`;
 
-      // Write the workbook to a file
-      XLSX.writeFile(workbook, fileName);
-
-      console.log(`File for module ${moduleUUID} created successfully.`);
+      // Create the .xlsx file in memory (as a buffer) and append it to the zip stream
+      const fileBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+      zipStream.append(fileBuffer, { name: fileName });
+      
+      console.log(`Module ${moduleUUID} added to zip.`);
     }
 
-    // Send success response
-    res.status(OK).send(
-      formatResponse('Successfully exported all assignments', true, undefined)
-    );
+    // Finalize the zip file
+    zipStream.finalize();
   } catch (error) {
     console.log('Error during export:', error.message);
     return res.status(INTERNAL_SERVER_ERROR).send(formatResponse(error.message, false));
