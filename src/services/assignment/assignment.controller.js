@@ -338,8 +338,6 @@ const getAllAssignment = async (req, res) => {
 const exportData = async (req, res) => {
   try {
     const assignments = await AssignmentModel.find().populate('userId');
-    
-    console.log('Fetched assignments:', assignments);
 
     // Group assignments by moduleUUID
     const groupedByModule = assignments.reduce((acc, assignment) => {

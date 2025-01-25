@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
-
 import app from './app.js';
 import config from './config.js';
 import { logger } from './util/index.js';
 import UserModel from './services/user/user.model.js';
+import cron from 'node-cron'
+import { backupAndUploadDb } from './util/autoBackup.js';
 
 /**
  * check if envy exist first
@@ -50,10 +51,20 @@ const initializeDefaultUser = async () => {
   }
 };
 
+// Schedule the backup task, deactivate until the mongodb-database-tools installed on the machine
+// // cron.schedule('59 23 * * *', async () => {
+//   cron.schedule('*/3 * * * *', async () => {
+//   console.log('Starting scheduled database backup...');
+//   try {
+//     await backupAndUploadDb();
+//     console.log('Database backup completed successfully.');
+//   } catch (error) {
+//     console.error('Failed to complete database backup:', error);
+//   }
+// });
+
 initializeDefaultUser();
-/**
- * setup express server
- */
+
 app.listen(config.port, () => {
   logger.info(`Server listening on: ${config.port}`);
 });

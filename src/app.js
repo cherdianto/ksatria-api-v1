@@ -9,6 +9,7 @@ import router from './routes.index.js';
 import { formatResponse, logger } from './util/index.js';
 import { checkAndStartCronJob } from './services/invitation/invitation.cronjob.js';
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const { OK, NOT_FOUND } = StatusCodes;
@@ -77,7 +78,7 @@ app.use((req, res, next) => {
 checkAndStartCronJob();
 
 app.get('/ping', (req, res) =>
-  res.status(OK).send(formatResponse('pong v.1.0.11', true))
+  res.status(OK).send(formatResponse('pong v.1.0.16', true))
 );
 app.use(router);
 
