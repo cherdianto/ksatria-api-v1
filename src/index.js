@@ -4,7 +4,7 @@ import config from './config.js';
 import { logger } from './util/index.js';
 import UserModel from './services/user/user.model.js';
 import cron from 'node-cron'
-import { backupAndUploadDb } from './util/autoBackup.js';
+import { backupAndEmail } from './util/dbEmailBackup.js';
 
 /**
  * check if envy exist first
@@ -52,16 +52,16 @@ const initializeDefaultUser = async () => {
 };
 
 // Schedule the backup task, deactivate until the mongodb-database-tools installed on the machine
-// // cron.schedule('59 23 * * *', async () => {
-//   cron.schedule('*/3 * * * *', async () => {
-//   console.log('Starting scheduled database backup...');
-//   try {
-//     await backupAndUploadDb();
-//     console.log('Database backup completed successfully.');
-//   } catch (error) {
-//     console.error('Failed to complete database backup:', error);
-//   }
-// });
+// cron.schedule('59 23 * * *', async () => {
+  cron.schedule('*/3 * * * *', async () => {
+  console.log('Starting scheduled database backup...');
+  try {
+    await backupAndEmail();
+    console.log('Database backup completed successfully.');
+  } catch (error) {
+    console.error('Failed to complete database backup:', error);
+  }
+});
 
 initializeDefaultUser();
 

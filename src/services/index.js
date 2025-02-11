@@ -3,3 +3,4 @@ export * from './assignment/index.js';
 export * from './module/index.js';
 export * from './user/index.js';
 export * from './invitation/index.js';
+export * from './restore/index.js';

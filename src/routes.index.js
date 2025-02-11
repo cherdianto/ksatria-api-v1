@@ -5,7 +5,8 @@ import {
   AssignmentRouter,
   ModuleRouter,
   UserRouter,
-  InvitationRouter
+  InvitationRouter,
+  RestoreRouter
 } from './services/index.js';
 
 /**
@@ -38,6 +39,10 @@ const defaultRoutes = [
   {
     path: '/invitation',
     route: InvitationRouter
+  },
+  {
+    path: '/restore',
+    route: RestoreRouter
   }
 ];
 
