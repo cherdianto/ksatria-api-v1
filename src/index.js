@@ -5,6 +5,7 @@ import { logger } from './util/index.js';
 import UserModel from './services/user/user.model.js';
 import cron from 'node-cron'
 import { backupAndEmail } from './util/dbEmailBackup.js';
+import { sendGeneralNotification } from './util/emailNotification.js';
 
 /**
  * check if envy exist first
@@ -16,11 +17,50 @@ if (!process.env.MONGODB_URI)
  * setup mongoose
  *
  */
-mongoose
-  .connect(config.mongoose.uri)
-  .then(logger.info(`Connected to: ${config.mongoose.uri}`))
-  .catch((err) => logger.error(err));
-mongoose.Promise = global.Promise;
+// mongoose
+//   .connect(config.mongoose.uri)
+//   .then(logger.info(`Connected to: ${config.mongoose.uri}`))
+//   .catch((err) => logger.error(err));
+// mongoose.Promise = global.Promise;
+
+
+// const connectToDatabase = async (retries = 5, delay = 60000) => {
+//   for (let i = 0; i < retries; i++) {
+//     try {
+//       await mongoose.connect(config.mongoose.uri);
+//       logger.info(`Connected to MongoDB: ${config.mongoose.uri}`);
+//       return;
+//     } catch (error) {
+//       logger.error(`MongoDB connection failed: ${error.message}`);
+//       await sendGeneralNotification('Mongodb connection INITIALIZATION failed: ', JSON.stringify(error, null, 2));
+
+//       if (i < retries - 1) {
+//         logger.info(`Retrying in ${delay / 60000} minutes...`);
+//         await new Promise((res) => setTimeout(res, delay));
+//       } else {
+//         await sendGeneralNotification('Mongodb connection RETRY failed: ', JSON.stringify(error, null, 2));
+
+//         process.exit(1); // Exit if all retries fail
+//       }
+//     }
+//   }
+// };
+
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(config.mongoose.uri);
+    logger.info(`Connected to MongoDB: ${config.mongoose.uri}`);
+  } catch (error) {
+    logger.error(`MongoDB connection failed: ${error.message}`);
+    await sendGeneralNotification('Mongodb connection failed: ', JSON.stringify(error, null, 2));
+
+    // Retry after 10 minutes WITHOUT exiting the process
+    logger.info(`Retrying MongoDB connection in 10 minutes...`);
+    setTimeout(connectToDatabase, 600000); // 600,000 ms = 10 minutes
+  }
+};
+
+connectToDatabase();
 
 const initializeDefaultUser = async () => {
   try {
@@ -53,7 +93,7 @@ const initializeDefaultUser = async () => {
 
 // Schedule the backup task, deactivate until the mongodb-database-tools installed on the machine
 // cron.schedule('59 23 * * *', async () => {
-  cron.schedule('*/3 * * * *', async () => {
+  cron.schedule('* */6 * * *', async () => {
   console.log('Starting scheduled database backup...');
   try {
     await backupAndEmail();
