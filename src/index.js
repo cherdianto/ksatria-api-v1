@@ -93,7 +93,7 @@ const initializeDefaultUser = async () => {
 
 // Schedule the backup task, deactivate until the mongodb-database-tools installed on the machine
 // cron.schedule('59 23 * * *', async () => {
-  cron.schedule('* */6 * * *', async () => {
+  cron.schedule('0 */6 * * *', async () => {
   console.log('Starting scheduled database backup...');
   try {
     await backupAndEmail();
