@@ -77,12 +77,13 @@ const save = (req, res) => {
     userId,
     body: { moduleId, moduleUUID, currentProgress, totalProgress, saveData },
   } = req;
+  
   const newSave = {
     moduleUUID,
     currentProgress,
     totalProgress,
     saveData,
-    progress: currentProgress !== totalProgress ? IN_PROGRESS : FINISHED,
+    progress: currentProgress === totalProgress ? FINISHED : IN_PROGRESS,
   };
 
   if (currentProgress === totalProgress) {
@@ -103,13 +104,32 @@ const save = (req, res) => {
     UserController.updateUserData(userId, updatedData).catch((err) =>
       res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false))
     );
+  } else {
+    const [moduleCode, moduleNumber] = moduleUUID.split(MODULE_SEPARATOR);
+
+    const updatedModule = {
+      [`modules.${moduleCode}.${moduleNumber}`]: IN_PROGRESS,
+    };
+
+    const updatedData =
+      moduleCode === INTERVENTION_MODULE
+        ? {
+            ...updatedModule,
+            [`modules.${ASSIGNMENT_MODULE}.${moduleNumber}`]: UNLOCKED,
+          }
+        : updatedModule;
+
+    UserController.updateUserData(userId, updatedData).catch((err) =>
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false))
+    );
   }
 
   AssignmentModel.findOneAndUpdate({ userId, moduleId }, newSave, {
     upsert: true,
     new: true,
   })
-    .then((assignment) =>
+    .then((assignment) => {
+      console.log('Updated Assignment:', assignment);
       res.status(CREATED).send(
         formatResponse('Successfully save assignment', true, undefined, {
           currentProgress: assignment.currentProgress,
@@ -118,11 +138,12 @@ const save = (req, res) => {
           progress: assignment.progress,
           feedbackData: assignment.feedbackData,
         })
-      )
-    )
-    .catch((err) =>
-      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false))
-    );
+      );
+    })
+    .catch((err) => {
+      console.error('Error updating assignment:', err);
+      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+    });
 };
 
 /**

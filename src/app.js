@@ -60,12 +60,12 @@ app.use((req, res, next) => {
   console.log('Origin:', req.headers.origin);
   console.log('Referer:', req.headers.referer);
   // UNCOMMENT BELOW FOR RUG
-  res.setHeader('Access-Control-Allow-Origin', 'http://onlinecbtindonesia.web.rug.nl');
-  res.setHeader('Access-Control-Allow-Origin', 'https://onlinecbtindonesia.web.rug.nl');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // res.setHeader('Access-Control-Allow-Origin', 'http://onlinecbtindonesia.web.rug.nl');
+  // res.setHeader('Access-Control-Allow-Origin', 'https://onlinecbtindonesia.web.rug.nl');
+  // res.setHeader('Access-Control-Allow-Origin', '*');
+  // res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === "OPTIONS") {
     return res.status(204).end(); // Respond with no content for preflight
@@ -78,7 +78,7 @@ app.use((req, res, next) => {
 checkAndStartCronJob();
 
 app.get('/ping', (req, res) =>
-  res.status(OK).send(formatResponse('pong v.2.3.02', true)) // versi 2 bulan 3, tgl 02
+  res.status(OK).send(formatResponse('pong v.1.5.04', true)) // versi 1 bulan 5, tgl 04
 );
 app.use(router);
 
