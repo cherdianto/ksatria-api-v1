@@ -35,8 +35,11 @@
 const get = {
   query: Joi.object().keys({
     moduleUUID: Joi.string().required(),
-    assignmentId: Joi.alternatives().try(Joi.array().required().items(Joi.string()), Joi.string())
-  })
+    assignmentId: Joi.alternatives().try(
+      Joi.array().required().items(Joi.string()),
+      Joi.string()
+    ),
+  }),
 };
 
 /**
@@ -49,15 +52,24 @@ const save = {
     moduleUUID: Joi.string().required(),
     currentProgress: Joi.number().required(),
     totalProgress: Joi.number().required(),
-    saveData: Joi.object().required().pattern(
-      Joi.string(),
-      Joi.object().keys({
-        assignmentId: Joi.string().required().min(2),
-        question: Joi.any().required(),
-        answer: Joi.any().required()
-      })
-    )
-  })
+    saveData: Joi.object()
+      .required()
+      .pattern(
+        Joi.string(),
+        Joi.object().keys({
+          assignmentId: Joi.string().required().min(2),
+          question: Joi.any().required(),
+          answer: Joi.any().required(),
+          type: Joi.any(), // ideally it has to be removed from FE
+          min: Joi.any(), // ideally it has to be removed from FE
+          max: Joi.any(), // ideally it has to be removed from FE
+          options: Joi.any(), // ideally it has to be removed from FE
+          needsFeedback: Joi.any(), // ideally it has to be removed from FE
+          withFeedback: Joi.any(), // ideally it has to be removed from FE
+          quiz: Joi.any(), // ideally it has to be removed from FE
+        })
+      ),
+  }),
 };
 
 /**
@@ -68,11 +80,8 @@ const feedback = {
   body: Joi.object().keys({
     userId: Joi.string().required(),
     moduleId: Joi.string().required(),
-    feedbackData: Joi.object().required().pattern(
-      Joi.string(),
-      Joi.string()
-    )
-  })
+    feedbackData: Joi.object().required().pattern(Joi.string(), Joi.string()),
+  }),
 };
 
 /**
@@ -81,15 +90,15 @@ const feedback = {
  */
 const load = {
   body: Joi.object().keys({
-    moduleId: Joi.string().hex().length(24).required()
-  })
+    moduleId: Joi.string().hex().length(24).required(),
+  }),
 };
 
 export default {
   get,
   load,
   save,
-  feedback
+  feedback,
 };
 </code></pre>
         </article>
@@ -101,13 +110,13 @@ export default {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#validate">validate</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#InvitationSchema">InvitationSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#TokenSchema">TokenSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#adminUpdateUserData">adminUpdateUserData</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#bulkCreate">bulkCreate</a></li><li><a href="global.html#changePasswordWithToken">changePasswordWithToken</a></li><li><a href="global.html#changeUserPassword">changeUserPassword</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#deleteInvitation">deleteInvitation</a></li><li><a href="global.html#deleteModule">deleteModule</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#generateResetPasswordLink">generateResetPasswordLink</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getAll">getAll</a></li><li><a href="global.html#getAllInvitations">getAllInvitations</a></li><li><a href="global.html#getDetailModule">getDetailModule</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#getUserData">getUserData</a></li><li><a href="global.html#invite">invite</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#update">update</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#updateUserProfile">updateUserProfile</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateResetPasswordLink">validateResetPasswordLink</a></li><li><a href="global.html#verify">verify</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Jul 19 2024 16:49:41 GMT+0700 (Western Indonesia Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Dec 16 2024 17:37:34 GMT+0700 (Western Indonesia Time)
 </footer>
 
 <script> prettyPrint(); </script>

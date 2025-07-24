@@ -1,7 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
-import constants from '../../constants';
-import { formatResponse } from '../../util';
-import UserModel from './user.model';
+import constants from '../../constants/index.js';
+import { formatResponse } from '../../util/index.js';
+import UserModel from './user.model.js';
+import AssignmentModel from '../assignment/assignment.model.js';
 
 const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR } = StatusCodes;
 const {
@@ -53,10 +54,9 @@ const getUserData = (req, res) => {
 // get all user data based on role
 // PAGINATION AND FILTER
 const adminGetAll = (req, res) => {
-  // const userId = req.userId;
   const {
-    page = 1,
-    pageSize = 10,
+    page = 1,          // Default page to 1
+    pageSize = 10,     // Default pageSize to 10
     filters = {},
     globalFilter = {},
   } = req.query;
@@ -66,39 +66,21 @@ const adminGetAll = (req, res) => {
   try {
     parsedFilters = JSON.parse(filters);
   } catch (error) {
-    return res
-      .status(400)
-      .send(formatResponse('Invalid filters format', false));
+    return res.status(400).send(formatResponse('Invalid filters format', false));
   }
 
   const query = {};
   const projection = '-password -updatedAt -createdAt';
 
   // Apply filters if any
-  if (parsedFilters.email) {
-    query.email = parsedFilters.email;
-  }
-  if (parsedFilters.username) {
-    query.username = parsedFilters.username;
-  }
-  if (parsedFilters.fullname) {
-    query.fullname = parsedFilters.fullname;
-  }
-  if (parsedFilters.role) {
-    query.role = parsedFilters.role;
-  }
-  if (parsedFilters.semester) {
-    query.semester = parsedFilters.semester;
-  }
-  if (parsedFilters.faculty) {
-    query.faculty = parsedFilters.faculty;
-  }
-  if (parsedFilters.status) {
-    query.status = parsedFilters.status;
-  }
-  if (parsedFilters.whatsapp) {
-    query.whatsapp = parsedFilters.whatsapp;
-  }
+  if (parsedFilters.email) query.email = parsedFilters.email;
+  if (parsedFilters.username) query.username = parsedFilters.username;
+  if (parsedFilters.fullname) query.fullname = parsedFilters.fullname;
+  if (parsedFilters.role) query.role = parsedFilters.role;
+  if (parsedFilters.semester) query.semester = parsedFilters.semester;
+  if (parsedFilters.faculty) query.faculty = parsedFilters.faculty;
+  if (parsedFilters.status) query.status = parsedFilters.status;
+  if (parsedFilters.whatsapp) query.whatsapp = parsedFilters.whatsapp;
 
   // Apply global filter
   if (globalFilter) {
@@ -108,47 +90,53 @@ const adminGetAll = (req, res) => {
       { username: { $regex: globalFilter, $options: 'i' } },
       { whatsapp: { $regex: globalFilter, $options: 'i' } },
       { role: { $regex: globalFilter, $options: 'i' } },
-      // { semester: { $regex: globalFilter, $options: 'i' } },
       { faculty: { $regex: globalFilter, $options: 'i' } },
       { status: { $regex: globalFilter, $options: 'i' } },
     ];
   }
 
+  // Ensure page and pageSize are numbers
+  const currentPage = parseInt(page, 10);
+  const limit = parseInt(pageSize, 10);
+
   UserModel.countDocuments(query)
     .then((total) => {
+      const totalPages = Math.ceil(total / limit);  // Calculate total pages
+
       UserModel.find(query)
         .select(projection)
-        .skip((page - 1) * pageSize)
-        .limit(Number(pageSize))
+        .skip((currentPage - 1) * limit)  // Skip based on page number
+        .limit(limit)  // Limit to page size
         .then((userData) => {
-          res.status(OK).send(
-            formatResponse(
-              'Successfully retrieved user data',
-              true,
-              undefined,
-              {
-                data: userData,
-                total,
-              }
-            )
+          res.status(200).send(
+            formatResponse('Successfully retrieved user data', true, undefined, {
+              data: userData,
+              total,                 // Total number of documents
+              currentPage,           // Current page being viewed
+              pageSize: limit,       // Page size being used
+              totalPages,            // Total number of pages
+            })
           );
         })
         .catch((err) => {
           res
-            .status(INTERNAL_SERVER_ERROR)
+            .status(500)
             .send(formatResponse(err.message, false));
         });
     })
     .catch((err) => {
       res
-        .status(INTERNAL_SERVER_ERROR)
+        .status(500)
         .send(formatResponse(err.message, false));
     });
 };
 
+
 // counselor get all students
-const getStudents = (isCounselor) => (req, res) => {
-  const filter = isCounselor ? { counselorId: req.userId } : req.body || {};
+const getStudents = (req, res) => {
+  const isCounselor = req.roles === 'counselor' ? true : false;
+  const filter =
+    req.roles === 'counselor' ? { counselorId: req.userId } : req.body || {};
   const options = isCounselor
     ? '-password -__v -createdAt -updatedAt -counselorId -roles'
     : '-password -__v';
@@ -173,6 +161,79 @@ const getStudents = (isCounselor) => (req, res) => {
             true,
             undefined,
             { users }
+          )
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+const getStudentsByPsychologist = async (req, res) => {
+  const counselors = await UserModel.find({
+    psychologistId: req.userId,
+    roles: 'counselor',
+  });
+
+  const counselorIds = counselors.map((counselor) => counselor._id);
+
+  const allStudents = await UserModel.find({
+    counselorId: { $in: counselorIds },
+  }).select('-password');
+  if (allStudents.length === 0) {
+    return res.status(OK).json(formatResponse('No student found.', true));
+  }
+  return res.status(OK).json(
+    formatResponse('Successfully retrieve all user data', true, undefined, {
+      allStudents,
+    })
+  );
+};
+
+const getCounselors = (req, res) => {
+  UserModel.find({ roles: 'counselor' })
+    .select('fullname _id')
+    .then((counselors) => {
+      // case db = empty
+      if (counselors.length === 0) {
+        return res.status(OK).json(formatResponse('No counselor found.', true));
+      }
+      return res
+        .status(OK)
+        .json(
+          formatResponse(
+            'Successfully retrieve all counselor data',
+            true,
+            undefined,
+            { counselors }
+          )
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+const getPsychologists = (req, res) => {
+  UserModel.find({ roles: 'psychologist' })
+    .select('fullname _id')
+    .then((psychologist) => {
+      // case db = empty
+      if (psychologist.length === 0) {
+        return res.status(OK).json(formatResponse('No counselor found.', true));
+      }
+      return res
+        .status(OK)
+        .json(
+          formatResponse(
+            'Successfully retrieve all counselor data',
+            true,
+            undefined,
+            { psychologist }
           )
         );
     })
@@ -213,6 +274,23 @@ const create = (req, res) => {
         .status(INTERNAL_SERVER_ERROR)
         .send(formatResponse(err.message, false));
     });
+};
+
+const destroy = async (req, res) => {
+  const userId = req.query.id;
+  try {
+    await UserModel.findByIdAndDelete(userId);
+
+    await AssignmentModel.deleteMany({ userId });
+
+    return res
+      .status(OK)
+      .send(formatResponse(`Successfully delete user`, true));
+  } catch (error) {
+    res
+      .status(INTERNAL_SERVER_ERROR)
+      .send(formatResponse(error.message, false));
+  }
 };
 
 /**
@@ -300,6 +378,7 @@ const adminUpdateUserData = (req, res) => {
     email,
     roles,
     counselorId,
+    psychologistId,
     status,
   } = req.body;
 
@@ -320,7 +399,8 @@ const adminUpdateUserData = (req, res) => {
       user.faculty = faculty || user.faculty;
       user.roles = roles || user.roles;
       user.status = status || user.status;
-      user.counselorId = counselorId || user.counselorId;
+      user.counselorId = roles === 'user' ? counselorId : null;
+      user.psychologistId = roles === 'counselor' ? psychologistId : null;
 
       return user.save();
     })
@@ -383,7 +463,6 @@ const getModules = (req, res) => {
 // const updateUserData = (userId, newData) =>
 //   UserModel.findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
 
-
 /**
  * updateUserData
  *
@@ -391,8 +470,8 @@ const getModules = (req, res) => {
  * @param {Object} newData - new user data
  * @returns controller to handling update some user data
  */
-const updateUserData = (userId, newData) => UserModel
-  .findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
+const updateUserData = (userId, newData) =>
+  UserModel.findOneAndUpdate({ _id: userId }, newData, { new: true }).exec();
 
 /**
  * updateIntro
@@ -463,7 +542,9 @@ const updateCounselor = (req, res) => {
 
 export default {
   getStudents,
+  getCounselors,
   create,
+  destroy,
   getModules,
   updateIntro,
   updateModules,
@@ -473,4 +554,6 @@ export default {
   updateUserProfile,
   getUserData,
   adminUpdateUserData,
+  getPsychologists,
+  getStudentsByPsychologist,
 };

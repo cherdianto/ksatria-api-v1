@@ -9,10 +9,19 @@ const ModuleSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  status: {
+    type: String,
+    enum: ['published', 'draft'],
+    default: 'draft'
+  },
   title: {
     type: String,
     required: false,
     unique: true
+  },
+  image: {
+    type: String,
+    required: false,
   },
   description: {
     type: String,
@@ -20,6 +29,11 @@ const ModuleSchema = new mongoose.Schema({
   },
   moduleContent: {
     type: Object,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ['intervension', 'assignment'],
     required: true
   }
 }, { timestamps: true, minimize: false });

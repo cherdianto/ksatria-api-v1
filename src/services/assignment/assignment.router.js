@@ -1,11 +1,11 @@
 import { Router } from 'express';
 
-import { authenticate, validate } from '../../middlewares';
-import AssignmentController from './assignment.controller';
-import AssignmentValidation from './assignment.validation';
-import constants from '../../constants';
+import { authenticate, validate } from '../../middlewares/index.js';
+import AssignmentController from './assignment.controller.js';
+import AssignmentValidation from './assignment.validation.js';
+import constants from '../../constants/index.js';
 
-const { USER_ROLE, COUNSELOR_ROLE_ONLY } = constants;
+const { USER_ROLE, COUNSELOR_ROLE_ONLY, ADMIN_ROLE_ONLY } = constants;
 
 const router = Router();
 
@@ -31,9 +31,7 @@ router
     AssignmentController.save
   );
 
-/**
- * routes for save assignment
- */
+
 router
   .route('/feedback')
   .post(
@@ -42,9 +40,14 @@ router
     AssignmentController.feedback
   );
 
-/**
- * routes for save assignment
- */
+  router
+  .route('/overall-feedback')
+  .post(
+    validate(AssignmentValidation.overallFeedback),
+    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    AssignmentController.overallFeedback
+  );
+
 router
   .route('/load')
   .get(
@@ -52,5 +55,23 @@ router
     authenticate.auth(USER_ROLE),
     AssignmentController.load
   );
+
+router.route('/all').get(
+  authenticate.auth(USER_ROLE),
+  AssignmentController.getAll
+);
+
+router.route('/allAssignment').get(
+  authenticate.auth(USER_ROLE),
+  AssignmentController.getAllAssignment
+);
+
+router
+  .route('/export')
+  .get(
+    authenticate.auth(COUNSELOR_ROLE_ONLY),
+    AssignmentController.exportData
+  );
+
 
 export default router;

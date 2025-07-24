@@ -31,10 +31,10 @@
 import ModuleModel from './module.model';
 import { formatResponse } from '../../util';
 import assignmentController from '../assignment/assignment.controller';
+import { UserModel } from '../user';
 
-const {
-  OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR
-} = StatusCodes;
+const { OK, CREATED, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } =
+  StatusCodes;
 
 /**
  * create or update existing module
@@ -43,17 +43,103 @@ const {
  * @returns controller to register new module
  */
 const create = (req, res) => {
-  const { moduleUUID, moduleContent } = req.body;
-  const newModule = { moduleUUID, moduleContent };
+  const { moduleUUID, moduleContent, image, description, title, type } =
+    req.body;
+  const newModule = {
+    moduleUUID,
+    moduleContent,
+    image,
+    description,
+    title,
+    status: 'draft',
+    type,
+  };
 
-  ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, { new: true, upsert: true })
+  ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, {
+    new: true,
+    upsert: true,
+  })
     .then(() => {
-      res.status(CREATED).send(
-        formatResponse(`Successfully register module ${moduleUUID}`, true)
+      res
+        .status(CREATED)
+        .send(
+          formatResponse(`Successfully register module ${moduleUUID}`, true)
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * create or update existing module
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to register new module
+ */
+const update = (req, res) => {
+  const { moduleUUID, moduleContent, image, description, title, status } = req.body;
+  const newModule = {
+    moduleUUID,
+    moduleContent,
+    image,
+    description,
+    title,
+    status,
+  };
+
+  ModuleModel.findOneAndUpdate({ moduleUUID }, newModule, {
+    new: true,
+    upsert: true,
+  })
+    .then(() => {
+      res
+        .status(CREATED)
+        .send(formatResponse(`Successfully update module ${moduleUUID}`, true));
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * get spesicfic module
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to get specific module
+ */
+const getDetailModule = (req, res) => {
+  const { moduleUUID, language } = req.query;
+  ModuleModel.findOne({ moduleUUID })
+    .then(async (module) => {
+      // handle module not found
+      if (!module) {
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Module doesn't exist", true, NOT_FOUND));
+      }
+
+      return res.status(OK).send(
+        formatResponse('Successfully retrieve module', true, undefined, {
+          id: module._id,
+          moduleUUID: module.moduleUUID,
+          image: module.image,
+          title: module.title,
+          description: module.description,
+          contents: module.moduleContent[language] || {},
+          status: module.status
+          // progress: mappedSaveData || {},
+        })
       );
     })
     .catch((err) => {
-      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
     });
 };
 
@@ -70,19 +156,26 @@ const get = (isAdmin) => (req, res) => {
     .then(async (module) => {
       // handle module not found
       if (!module) {
-        return res.status(NOT_FOUND).send(
-          formatResponse('Module doesn\'t exist', true, NOT_FOUND)
-        );
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Module doesn't exist", true, NOT_FOUND));
       }
 
       const userId = isAdmin ? req.query.userId : req.userId;
-      const _loadSaveData = await assignmentController.getSaveData(userId, module._id);
+      const _loadSaveData = await assignmentController.getSaveData(
+        userId,
+        module._id
+      );
       let mappedSaveData = null;
 
       // attach user save data
       if (_loadSaveData) {
         const {
-          currentProgress, totalProgress, saveData, progress, feedbackData
+          currentProgress,
+          totalProgress,
+          saveData,
+          progress,
+          feedbackData,
         } = _loadSaveData;
 
         mappedSaveData = {
@@ -90,7 +183,7 @@ const get = (isAdmin) => (req, res) => {
           totalProgress,
           progress,
           saveData,
-          feedbackData
+          feedbackData,
         };
       }
 
@@ -99,18 +192,89 @@ const get = (isAdmin) => (req, res) => {
           id: module._id,
           moduleUUID: module.moduleUUID,
           contents: module.moduleContent[language] || {},
-          progress: mappedSaveData || {}
+          progress: mappedSaveData || {},
         })
       );
     })
     .catch((err) => {
-      res.status(INTERNAL_SERVER_ERROR).send(formatResponse(err.message, false));
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
+    });
+};
+
+/**
+ * get all modules
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to get all modules
+ */
+const getAll = async (req, res) => {
+  const userId = req.userId;
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    return res.status(UNAUTHORIZED).send(formatResponse(err.message, false));
+  }
+
+  // get all data if role is admin, get only published if other role
+  const query =
+    user?.roles === 'admin'
+      ? { type: 'intervension' }
+      : { status: 'published', type: 'intervension' };
+
+  const modules = await ModuleModel.find(query).select(
+    'title description status image moduleUUID'
+  );
+
+  if (!modules) {
+    return res.status(NOT_FOUND).send(formatResponse(err.message, false));
+  }
+
+  res.status(OK).send(
+    formatResponse('Successfully retreive all modules', true, undefined, {
+      modules,
+    })
+  );
+};
+
+/**
+ * delete a module without deleting the user assignment data
+ * @param {Object} req - express req
+ * @param {Object} res - express res
+ * @returns controller to delete a module
+ */
+const deleteModule = (req, res) => {
+  const { moduleUUID } = req.params;
+
+  ModuleModel.findOneAndDelete({ moduleUUID })
+    .then((deletedModule) => {
+      if (!deletedModule) {
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Module doesn't exist", false, NOT_FOUND));
+      }
+
+      return res
+        .status(OK)
+        .send(
+          formatResponse(`Successfully deleted module ${moduleUUID}`, true)
+        );
+    })
+    .catch((err) => {
+      res
+        .status(INTERNAL_SERVER_ERROR)
+        .send(formatResponse(err.message, false));
     });
 };
 
 export default {
   create,
-  get
+  update,
+  get,
+  getAll,
+  getDetailModule,
+  deleteModule,
 };
 </code></pre>
         </article>
@@ -122,13 +286,13 @@ export default {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#validate">validate</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#AssignmentSchema">AssignmentSchema</a></li><li><a href="global.html#InvitationSchema">InvitationSchema</a></li><li><a href="global.html#ModuleSchema">ModuleSchema</a></li><li><a href="global.html#TokenSchema">TokenSchema</a></li><li><a href="global.html#UserSchema">UserSchema</a></li><li><a href="global.html#adminUpdateUserData">adminUpdateUserData</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#auth">auth</a></li><li><a href="global.html#bulkCreate">bulkCreate</a></li><li><a href="global.html#changePasswordWithToken">changePasswordWithToken</a></li><li><a href="global.html#changeUserPassword">changeUserPassword</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#defaultRoutes">defaultRoutes</a></li><li><a href="global.html#deleteInvitation">deleteInvitation</a></li><li><a href="global.html#deleteModule">deleteModule</a></li><li><a href="global.html#feedback">feedback</a></li><li><a href="global.html#formatResponse">formatResponse</a></li><li><a href="global.html#generateAccessToken">generateAccessToken</a></li><li><a href="global.html#generateRefreshToken">generateRefreshToken</a></li><li><a href="global.html#generateResetPasswordLink">generateResetPasswordLink</a></li><li><a href="global.html#get">get</a></li><li><a href="global.html#getAll">getAll</a></li><li><a href="global.html#getAllInvitations">getAllInvitations</a></li><li><a href="global.html#getDetailModule">getDetailModule</a></li><li><a href="global.html#getModule">getModule</a></li><li><a href="global.html#getModules">getModules</a></li><li><a href="global.html#getSaveData">getSaveData</a></li><li><a href="global.html#getStudentModule">getStudentModule</a></li><li><a href="global.html#getUserData">getUserData</a></li><li><a href="global.html#invite">invite</a></li><li><a href="global.html#load">load</a></li><li><a href="global.html#login">login</a></li><li><a href="global.html#logout">logout</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#refresh">refresh</a></li><li><a href="global.html#register">register</a></li><li><a href="global.html#registerUser">registerUser</a></li><li><a href="global.html#router">router</a></li><li><a href="global.html#save">save</a></li><li><a href="global.html#update">update</a></li><li><a href="global.html#updateCounselor">updateCounselor</a></li><li><a href="global.html#updateIntro">updateIntro</a></li><li><a href="global.html#updateModules">updateModules</a></li><li><a href="global.html#updateUserData">updateUserData</a></li><li><a href="global.html#updateUserProfile">updateUserProfile</a></li><li><a href="global.html#validate">validate</a></li><li><a href="global.html#validateResetPasswordLink">validateResetPasswordLink</a></li><li><a href="global.html#verify">verify</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Jul 19 2024 16:49:41 GMT+0700 (Western Indonesia Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Dec 16 2024 17:37:34 GMT+0700 (Western Indonesia Time)
 </footer>
 
 <script> prettyPrint(); </script>

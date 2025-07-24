@@ -1,2 +1,2 @@
 // eslint-disable-next-line no-restricted-exports
-export { default } from './constants';
+export { default } from './constants.js';

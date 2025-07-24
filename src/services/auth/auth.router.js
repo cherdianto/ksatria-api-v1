@@ -2,11 +2,11 @@
 
 import { Router } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import constants from '../../constants';
-import { formatResponse } from '../../util';
-import { validate, authenticate } from '../../middlewares';
-import AuthController from './auth.controller';
-import AuthValidation from './auth.validation';
+import constants from '../../constants/index.js';
+import { formatResponse } from '../../util/index.js';
+import { validate, authenticate } from '../../middlewares/index.js';
+import AuthController from './auth.controller.js';
+import AuthValidation from './auth.validation.js';
 
 const router = Router();
 
@@ -22,12 +22,13 @@ router
  */
 router
   .route('/logout')
-  .post(authenticate.auth(constants.USER_ROLE), AuthController.logout);
+  // .post(authenticate.auth(constants.USER_ROLE), AuthController.logout);
+  .post(AuthController.logout);
 
 /**
  * routes for ping logged in user
  */
-router.route('/refresh').post(authenticate.refresh, AuthController.refresh);
+router.route('/refresh').get(authenticate.refresh, AuthController.refresh);
 
 /**
  * routes for ping logged in user

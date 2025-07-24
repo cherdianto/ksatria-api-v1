@@ -3,13 +3,13 @@
 import { StatusCodes } from 'http-status-codes';
 import crypto from 'crypto';
 
-import { UserModel } from '../user';
-import TokenModel from '../token/token.model';
-import { formatResponse, jwt } from '../../util';
-import constants from '../../constants';
-import tokenGenerator from '../../util/tokenGenerator';
-import { sendEmail } from '../../util/emailNotification';
-import { comparePasswords } from '../../util/comparePassword';
+import { UserModel } from '../user/index.js';
+import TokenModel from '../token/token.model.js';
+import { formatResponse, jwt } from '../../util/index.js';
+import constants from '../../constants/index.js';
+import tokenGenerator from '../../util/tokenGenerator.js';
+import { sendEmail } from '../../util/emailNotification.js';
+import { comparePasswords } from '../../util/comparePassword.js';
 
 const { OK, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED } = StatusCodes;
 
@@ -32,6 +32,12 @@ const login = (req, res) => {
           .send(formatResponse("Username doesn't exist", true, NOT_FOUND));
       }
 
+      if (user.status !== 'active') {
+        return res
+          .status(NOT_FOUND)
+          .send(formatResponse("Your account is under review or inactive, please contact our administrator", true, NOT_FOUND));
+      }
+
       // handle wrong password
       return user.comparePassword(password, (err, isMatch) => {
         if (err) throw err;
@@ -43,18 +49,25 @@ const login = (req, res) => {
             userId: user._id,
             username: user.username,
             roles: user.roles,
+            email: user.email,
           };
 
           return res
             .cookie(
               'refreshToken',
               jwt.generateRefreshToken(tokenPayload),
-              constants.cookieOptions(false)
+              {
+                httpOnly: true,
+                maxAge: 30 * 24 * 60 * 60 * 1000,
+                secure: true,
+                sameSite: 'None',
+              }
             )
             .status(OK)
             .send(
               formatResponse('Successfully login', true, undefined, {
                 token: jwt.generateAccessToken(tokenPayload),
+                user: user,
               })
             );
         }
@@ -89,26 +102,14 @@ const refresh = (req, res) => {
   );
 };
 
-/**
- * logout
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling logout and remove cookie
- */
+
 const logout = (req, res) =>
   res
     .cookie('refreshToken', '', constants.cookieOptions(true))
     .status(OK)
     .send(formatResponse('Successfully logout', true));
 
-/**
- * validate reset password link
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling reset password link
- */
+
 const validateResetPasswordLink = (req, res) => {
   const { token } = req.body;
 
@@ -133,13 +134,6 @@ const validateResetPasswordLink = (req, res) => {
     });
 };
 
-/**
- * generate reset password
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling generation of reset link
- */
 const generateResetPasswordLink = async (req, res) => {
   const { email } = req.body;
 
@@ -193,13 +187,6 @@ const generateResetPasswordLink = async (req, res) => {
   }
 };
 
-/**
- * change password with token
- *
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @returns controller to handling reset password link
- */
 const changePasswordWithToken = (req, res) => {
   const { newPassword, token } = req.body;
 

@@ -1,41 +1,27 @@
 import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
-
-import config from '../config';
-import { formatResponse, logger } from '../util';
+import config from '../config.js';
+import { formatResponse, logger } from '../util/index.js';
 
 const { UNAUTHORIZED, FORBIDDEN } = StatusCodes;
 
-/**
- * checkRefreshToken
- * @param {Object} req - express req
- *
- * @returns function to check refresh token
- * @private
- */
 const _checkRefreshToken = (req) => {
   const refreshToken = req.cookies?.refreshToken;
+  logger.info('refreshToken ' + refreshToken)
 
   if (!refreshToken) throw new Error('Access denied. No refresh token provided.');
 
   return jwt.verify(refreshToken, config.secretKeyRefresh);
 };
 
-/**
- * authenticate middleware
- * @param {String[]} allowedRoles - allowed roles to access the routes
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @param {Object} next - express next
- *
- * @returns middleware to check if user can access the route
- */
+
 const refresh = (req, res, next) => {
   try {
-    const { userId, username, roles } = _checkRefreshToken(req);
+    const { userId, username, roles, email } = _checkRefreshToken(req);
     req.userId = userId;
     req.username = username;
     req.roles = roles;
+    req.email = email;
     next();
   } catch (error) {
     logger.error('Failed to Authorized', error);
@@ -44,15 +30,6 @@ const refresh = (req, res, next) => {
   }
 };
 
-/**
- * authenticate middleware
- * @param {String[]} allowedRoles - allowed roles to access the routes
- * @param {Object} req - express req
- * @param {Object} res - express res
- * @param {Object} next - express next
- *
- * @returns middleware to check if user can access the route
- */
 const auth = (allowedRoles) => async (req, res, next) => {
   const accessToken = req.headers?.authorization?.split(' ')[1];
 
@@ -65,6 +42,7 @@ const auth = (allowedRoles) => async (req, res, next) => {
 
     if (!allowedRoles.includes(roles)) return res.status(FORBIDDEN).send(formatResponse('Access denied.', false, FORBIDDEN));
 
+    req.roles = roles;
     req.userId = userId;
     req.username = username;
     return next();

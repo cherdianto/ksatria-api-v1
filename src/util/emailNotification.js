@@ -1,9 +1,5 @@
 import nodemailer from 'nodemailer';
-// import dotenv from 'dotenv';
 import fs from 'fs';
-
-// Load environment variables from .env file
-// dotenv.config();
 
 // Load email templates
 const invitationTemplate = fs.readFileSync(
@@ -22,6 +18,19 @@ const passwordChangedTemplate = fs.readFileSync(
   'src/templates/email_templates/password_changed_template.html',
   'utf-8'
 );
+
+const feedbackNotification = fs.readFileSync(
+  'src/templates/email_templates/feedback_notification.html',
+  'utf-8'
+);
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_ADDRESS,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
 
 // Function to send an email with template
 export const sendEmail = async ({
@@ -63,17 +72,18 @@ export const sendEmail = async ({
       );
       emailSubject = subject || 'Password Change Notification';
       break;
+    case 'feedback_notification':
+      htmlTemplate = feedbackNotification.replace(
+        '{{moduleUUID}}',
+        dynamicData.moduleUUID
+      );
+      emailSubject = subject || 'Feedback Notification';
+      break;
     default:
       throw new Error('Invalid template type');
   }
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_ADDRESS,
-      pass: process.env.EMAIL_APP_PASSWORD,
-    },
-  });
+
 
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS,
@@ -88,6 +98,25 @@ export const sendEmail = async ({
     return info.response;
   } catch (error) {
     console.error('Error sending email:', error);
+    throw error;
+  }
+};
+
+export const sendGeneralNotification = async (message) => {
+
+  const mailOptions = {
+    from: process.env.EMAIL_ADDRESS,
+    to: 'webcreatia@gmail.com',
+    subject: 'General Notification from Ksatria',
+    text: message,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('General notification email sent:', info.response);
+    return info.response;
+  } catch (error) {
+    console.error('Error sending general notification email:', error);
     throw error;
   }
 };

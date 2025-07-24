@@ -13,8 +13,14 @@ RUN npm install
 # Copy the rest of your application code to the working directory
 COPY . .
 
-# Expose the port your app runs on
-EXPOSE 3000
+# Copy .env file to the container (make sure .env is in the root of your project)
+COPY .env .env
+
+# Set default PORT (optional)
+ENV PORT=3000
 
 # Command to run your application
 CMD ["npm","run","start"]
+
+# Expose the default port (optional)
+EXPOSE $PORT

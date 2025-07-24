@@ -1,8 +1,8 @@
 import Joi from 'joi';
-import pick from 'lodash/pick';
+import pick from 'lodash/pick.js';
 import { StatusCodes } from 'http-status-codes';
 
-import { formatResponse } from '../util';
+import { formatResponse } from '../util/index.js';
 
 const { BAD_REQUEST } = StatusCodes;
 
